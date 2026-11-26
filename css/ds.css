@@ -592,6 +592,11 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
 .logo .leaf { font-size: 22px; line-height: 1; display: inline-block; transform: translateY(-1px); }
 @media (max-width: 420px) { .logo { font-size: 16.5px; } .logo .leaf { font-size: 19px; } }
 
-/* ---------- Logo: chữ M Mgotoo + grass.mgotoo.com ---------- */
-.logo .mark { display: block; height: 32px; width: auto; flex: none; }
-@media (max-width: 420px) { .logo .mark { height: 28px; } }
+/* ---------- Logo: logo Mgotoo đầy đủ + chữ grass.mgotoo ---------- */
+.logo { gap: 10px; }
+.logo .mark { display: block; height: 40px; width: auto; flex: none; }
+.hd.scrolled .logo .mark { height: 36px; }
+.ft .logo .mark { height: 44px; }
+/* Header trong suốt trên ảnh tối (trang chủ): logo đặt trên nền trắng bo góc cho dễ nhìn */
+.hd.on-dark:not(.scrolled) .logo .mark { background: rgba(255, 255, 255, .92); padding: 3px 8px; border-radius: 10px; box-sizing: content-box; }
+@media (max-width: 420px) { .logo .mark { height: 32px; } .logo { font-size: 15.5px; gap: 8px; } }

@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/monitor.css?v=2">
+    <link rel="stylesheet" href="css/monitor.css?v=3">
 </head>
 
 <body>
@@ -173,6 +173,45 @@
                 <div class="pager" id="pager"></div>
             </section>
 
+            <!-- Sao lưu tự động -->
+            <section class="card bk" aria-labelledby="bk-title">
+                <div class="card-head">
+                    <h2 id="bk-title">Sao lưu tự động</h2>
+                    <button class="btn btn-ghost btn-sm bk-toggle" type="button" id="bk-toggle" aria-pressed="false"><i class="sw-toggle" aria-hidden="true"></i><span>Đã tắt</span></button>
+                </div>
+                <div class="grid grid-3">
+                    <div class="bk-box">
+                        <h3>Trạng thái</h3>
+                        <span class="pill" id="bk-state">Đã tắt</span>
+                        <dl class="bk-kv">
+                            <dt>Lần tiếp theo</dt><dd id="bk-next">—</dd>
+                            <dt>Lần gần nhất</dt><dd id="bk-last">Chưa sao lưu lần nào</dd>
+                        </dl>
+                        <span class="pill" id="bk-server">Server: đang kiểm tra…</span>
+                    </div>
+                    <div class="bk-box">
+                        <h3>Thông tin sao lưu</h3>
+                        <ul class="bk-info">
+                            <li>Tự chạy lúc <b id="bk-time">13:00 (giờ VN)</b> mỗi ngày</li>
+                            <li>Sao lưu dữ liệu <b id="bk-day">của ngày hôm trước</b></li>
+                            <li>Xuất 2 file: <b>Excel (.xls)</b> và <b>JSON (.json)</b></li>
+                            <li>Lưu vào <span id="bk-where">thư mục backups/ trên server</span></li>
+                            <li>Tên file theo ngày, ví dụ <code>hohai-vn_2026-11-25.xls</code></li>
+                            <li>Chỉ chạy khi trang này đang mở trên máy đã bật. Mở trang sau giờ hẹn thì tự chạy bù.</li>
+                        </ul>
+                    </div>
+                    <div class="bk-box">
+                        <h3>Sao lưu thủ công</h3>
+                        <p class="muted small">Sao lưu ngay dữ liệu của ngày hôm qua (Excel + JSON), không cần chờ tới giờ hẹn.</p>
+                        <button class="btn btn-primary btn-block" type="button" id="bk-manual">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Sao lưu ngay (dữ liệu hôm qua)
+                        </button>
+                    </div>
+                </div>
+                <h3 class="bk-hist-title">Lịch sử sao lưu <span class="muted small">(trên máy này)</span></h3>
+                <ul class="bk-history" id="bk-history"></ul>
+            </section>
+
             <p class="foot muted small">Giờ hiển thị theo giờ Việt Nam (GMT+7). Vị trí suy ra từ địa chỉ IP nên chỉ đúng ở mức tỉnh/thành. Lượt xem từ bot và từ máy đã từng mở trang giám sát này không được tính.</p>
         </main>
 
@@ -196,8 +235,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="js/monitor-config.js?v=2"></script>
-    <script src="js/monitor.js?v=2"></script>
+    <script src="js/monitor-config.js?v=3"></script>
+    <script src="js/monitor.js?v=3"></script>
 </body>
 
 </html>

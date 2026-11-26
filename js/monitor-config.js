@@ -14,5 +14,16 @@ window.HOHAI_MONITOR = {
     },
     root: 'hohai_vn_analytics',      // nhánh dữ liệu của web VN (web US dùng 'hohai_analytics')
     adminsPath: 'hohai_vn_admins',   // danh sách UID được xem dashboard (chỉ sửa trong Firebase Console)
-    sdk: 'https://www.gstatic.com/firebasejs/9.23.0/'
+    sdk: 'https://www.gstatic.com/firebasejs/9.23.0/',
+
+    // Sao lưu tự động (khung "Sao lưu tự động" trong analytics.html)
+    backup: {
+        hour: 13, minute: 0,          // giờ chạy mỗi ngày, theo giờ Việt Nam
+        daysAgo: 1,                   // 1 = sao lưu dữ liệu ngày hôm trước
+        // Server lưu file (server.js của web US, có /api/backup/health và /api/backup/save-batch).
+        // Để '' nếu không dùng server: file sẽ tải về thư mục Downloads của máy đang mở trang giám sát.
+        // Lưu ý: trang chạy https thì server cũng phải là https, nếu không trình duyệt sẽ chặn.
+        server: 'http://43.156.51.248:3007',
+        filePrefix: 'hohai-vn'        // tên file: hohai-vn_2026-11-25.xls / .json (tách biệt với file của web US)
+    }
 };

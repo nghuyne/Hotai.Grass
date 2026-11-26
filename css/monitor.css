@@ -321,3 +321,30 @@ svg { flex: none; }
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { animation: none !important; transition: none !important; }
 }
+
+/* ---------- Sao lưu tự động ---------- */
+.grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.bk { margin-top: 20px; }
+.bk-box { border: 1px solid var(--line); border-radius: 12px; padding: 18px; background: #fbfcfa; min-width: 0; display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
+.bk-box h3, .bk-hist-title { font-size: 15px; margin: 0; color: var(--ink); }
+.bk-box .btn-block { margin-top: auto; }
+.bk-kv { display: grid; grid-template-columns: auto 1fr; gap: 6px 12px; margin: 0; font-size: 14px; }
+.bk-kv dt { color: var(--muted); }
+.bk-kv dd { margin: 0; color: var(--ink); font-weight: 500; }
+.bk-info { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 14px; color: var(--ink-2); }
+.bk-info li { padding-left: 22px; position: relative; }
+.bk-info li::before { content: ''; position: absolute; left: 2px; top: 6px; width: 10px; height: 5px; border-left: 2px solid var(--up); border-bottom: 2px solid var(--up); transform: rotate(-45deg); }
+.bk-info code { font-size: 12.5px; background: var(--line-2); padding: 1px 6px; border-radius: 6px; }
+.pill-warn { background: #fff4e0; color: var(--warn); }
+.bk-toggle .sw-toggle { width: 30px; height: 18px; border-radius: 999px; background: #cfd8d1; position: relative; transition: background .2s; }
+.bk-toggle .sw-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 14px; height: 14px; border-radius: 50%; background: #fff; transition: transform .2s var(--ease); }
+.bk-toggle[aria-pressed="true"] { border-color: var(--brand); color: var(--brand); }
+.bk-toggle[aria-pressed="true"] .sw-toggle { background: var(--brand); }
+.bk-toggle[aria-pressed="true"] .sw-toggle::after { transform: translateX(12px); }
+.bk-toggle { gap: 8px; }
+.bk-hist-title { margin-top: 22px; }
+.bk-history { list-style: none; margin: 10px 0 0; padding: 0; max-height: 280px; overflow-y: auto; }
+.bk-history li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-top: 1px solid var(--line-2); font-size: 14px; flex-wrap: wrap; }
+.bk-history li.bad b { color: var(--down); }
+.bk-history li.empty { justify-content: center; padding: 18px 0; }
+@media (max-width: 960px) { .grid-3 { grid-template-columns: 1fr; } }

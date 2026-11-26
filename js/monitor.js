@@ -118,6 +118,11 @@
                 return () => ref.off('value', h);
             },
             fetchSession(sid) { return r('sessions/' + sid).once('value').then((s) => s.val()); },
+            // Sao lưu: đọc 1 lần các lượt bắt đầu trong [from, to] và toàn bộ hành động của 1 lượt
+            fetchSessionsBetween(from, to) {
+                return r('sessions').orderByChild('startedAt').startAt(from).endAt(to).once('value').then((s) => s.val() || {});
+            },
+            fetchEvents(sid) { return r('events/' + sid).once('value').then((s) => s.val() || {}); },
             watchEvents(sid, cb) {
                 const ref = r('events/' + sid);
                 const h = ref.on('value', (s) => cb(s.val() || {}), () => cb({}));
@@ -579,25 +584,191 @@
     /* =====================================================================
      * 6. Xuất CSV (mở được bằng Excel / Google Sheets)
      * ===================================================================== */
+    // Cột dùng chung cho file CSV và file Excel sao lưu
+    const EXPORT_HEAD = ['Ngày', 'Giờ bắt đầu', 'Hoạt động cuối', 'Mã khách', 'Khách', 'Thành phố', 'Vùng', 'Quốc gia', 'IP', 'Thiết bị', 'Hệ điều hành', 'Trình duyệt',
+        'Nguồn', 'Chiến dịch', 'Trang vào', 'Số trang', 'Thời gian xem (giây)', 'Đã liên hệ', 'Số lần bấm Zalo', 'Số lần bấm gọi', 'Liên hệ qua nút'];
+    const exportRow = (s) => [
+        fullDate(s.startedAt), hhmmss(s.startedAt), s.lastSeen ? hhmmss(s.lastSeen) : '', s.visitorId, s.returning ? 'Quay lại' : 'Mới',
+        s.city, s.region, s.country, s.ip, deviceName(s.device), s.os, s.browser, s.source, s.campaign, pageName(s.landing),
+        s.pageViews || 1, Math.round(s.activeSec || 0), s.contacted ? 'Có' : 'Không', s.zaloClicks || 0, s.phoneClicks || 0, (s.contactVia || '').replace(/ · [a-z]+$/, '')
+    ];
+
+    function downloadBlob(content, fileName, mime) {
+        const blob = new Blob([content], { type: mime + ';charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = fileName;
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(a.href), 60e3);
+    }
+
     function exportCsv() {
         const R = rangeInfo();
         const data = filtered(list(R.start, R.end + 1));
         if (!data.length) { toast('Không có dữ liệu để xuất.'); return; }
-        const head = ['Ngày', 'Giờ bắt đầu', 'Hoạt động cuối', 'Mã khách', 'Khách', 'Thành phố', 'Vùng', 'Quốc gia', 'IP', 'Thiết bị', 'Hệ điều hành', 'Trình duyệt',
-            'Nguồn', 'Chiến dịch', 'Trang vào', 'Số trang', 'Thời gian xem (giây)', 'Đã liên hệ', 'Số lần bấm Zalo', 'Số lần bấm gọi', 'Liên hệ qua nút'];
         const cell = (v) => { const s = String(v == null ? '' : v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
-        const lines = [head.join(',')].concat(data.map((s) => [
-            fullDate(s.startedAt), hhmmss(s.startedAt), s.lastSeen ? hhmmss(s.lastSeen) : '', s.visitorId, s.returning ? 'Quay lại' : 'Mới',
-            s.city, s.region, s.country, s.ip, deviceName(s.device), s.os, s.browser, s.source, s.campaign, pageName(s.landing),
-            s.pageViews || 1, Math.round(s.activeSec || 0), s.contacted ? 'Có' : 'Không', s.zaloClicks || 0, s.phoneClicks || 0, (s.contactVia || '').replace(/ · [a-z]+$/, '')
-        ].map(cell).join(',')));
-        const blob = new Blob(['﻿' + lines.join('\r\n')], { type: 'text/csv;charset=utf-8' });
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'truy-cap-hohai-vn_' + fullDate(R.start).split('/').reverse().join('-') + '_' + state.range + '.csv';
-        document.body.appendChild(a); a.click(); a.remove();
-        setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+        const lines = [EXPORT_HEAD.join(',')].concat(data.map((s) => exportRow(s).map(cell).join(',')));
+        downloadBlob('﻿' + lines.join('\r\n'), 'truy-cap-hohai-vn_' + fullDate(R.start).split('/').reverse().join('-') + '_' + state.range + '.csv', 'text/csv');
         toast('Đã xuất ' + data.length + ' lượt truy cập.');
+    }
+
+    /* =====================================================================
+     * 6b. Sao lưu tự động mỗi ngày (Excel + JSON)
+     * ---------------------------------------------------------------------
+     * - Chạy trong trình duyệt: chỉ chạy khi trang giám sát này đang mở trên một máy đã BẬT sao lưu.
+     *   Mở trang sau giờ hẹn mà hôm nay chưa sao lưu thì chạy bù ngay.
+     * - Nếu có server sao lưu (CFG.backup.server) → gửi file lên thư mục backups/ của server.
+     *   Không có / không kết nối được → tải file về thư mục Downloads của máy.
+     * - File JSON giữ nguyên cấu trúc Firebase (sessions + events) để nhập lại được khi cần.
+     * ===================================================================== */
+    const BK = Object.assign({ hour: 13, minute: 0, daysAgo: 1, server: '', filePrefix: 'hohai-vn', historyMax: 30 }, CFG.backup || {});
+    const LS_BK = 'hohai_vn_monitor_backup';
+    const BK_SERVER = String(BK.server || '').replace(/\/+$/, '');
+    let bkBusy = false, bkServerOk = null;
+
+    const isoDay = (ts) => { const d = vnDate(ts); return d.getUTCFullYear() + '-' + pad(d.getUTCMonth() + 1) + '-' + pad(d.getUTCDate()); };
+    const fromIso = (iso) => { const [y, m, d] = iso.split('-').map(Number); return Date.UTC(y, m - 1, d) - VN; };
+    const viDay = (iso) => iso.split('-').reverse().join('/');
+
+    function bkLoad() {
+        try { return Object.assign({ enabled: false, lastRunDay: '', history: [] }, JSON.parse(localStorage.getItem(LS_BK) || '{}')); }
+        catch (e) { return { enabled: false, lastRunDay: '', history: [] }; }
+    }
+    function bkSave(st) { try { localStorage.setItem(LS_BK, JSON.stringify(st)); } catch (e) { } }
+
+    // Mốc giờ sao lưu của ngày chứa ts (giờ VN)
+    const bkTimeOf = (ts) => vnDayStart(ts) + (BK.hour * 60 + BK.minute) * 60e3;
+    function bkNextRun() {
+        const t = bkTimeOf(now());
+        return bkLoad().lastRunDay === isoDay(now()) || now() >= t ? t + DAY : t;
+    }
+
+    async function bkCheckServer() {
+        if (!BK_SERVER) { bkServerOk = null; return null; }
+        try {
+            const ctl = new AbortController(); const tm = setTimeout(() => ctl.abort(), 5000);
+            const res = await fetch(BK_SERVER + '/api/backup/health', { signal: ctl.signal, cache: 'no-store' });
+            clearTimeout(tm);
+            bkServerOk = res.ok && (await res.json()).status === 'ok';
+        } catch (e) { bkServerOk = false; }
+        return bkServerOk;
+    }
+
+    async function bkSaveToServer(files) {
+        const res = await fetch(BK_SERVER + '/api/backup/save-batch', {
+            method: 'POST', headers: { 'Content-Type': 'application/json; charset=utf-8' },
+            body: JSON.stringify({ files: files.map((f) => ({ fileName: f.name, content: f.content, mimeType: f.mime })) })
+        });
+        const out = await res.json();
+        if (!res.ok || !out.success || (out.files || []).some((f) => !f.success)) throw new Error(out.error || 'Server không lưu được file');
+    }
+
+    function bkExcel(sessions, iso) {
+        const th = 'background:#1d5236;color:#fff;font-weight:bold;border:1px solid #16402a;padding:6px 10px;';
+        const td = 'border:1px solid #d5ddd4;padding:4px 8px;mso-number-format:"\\@";';
+        let html = '<!DOCTYPE html><html><head><meta charset="UTF-8"></head><body>';
+        html += '<table border="1" style="border-collapse:collapse;font-family:Calibri,Arial,sans-serif;font-size:12px">';
+        html += '<caption style="font-weight:bold;font-size:14px;text-align:left;padding:6px 0">Truy cập web HoHai VN · ngày ' + viDay(iso) + ' · ' + sessions.length + ' lượt</caption>';
+        html += '<thead><tr>' + EXPORT_HEAD.map((h) => '<th style="' + th + '">' + esc(h) + '</th>').join('') + '</tr></thead><tbody>';
+        sessions.forEach((s) => { html += '<tr>' + exportRow(s).map((v) => '<td style="' + td + '">' + esc(v) + '</td>').join('') + '</tr>'; });
+        return html + '</tbody></table></body></html>';
+    }
+
+    async function bkRun(iso, manual) {
+        if (bkBusy) return;
+        bkBusy = true; bkRender('Đang sao lưu dữ liệu ngày ' + viDay(iso) + '…');
+        const st = bkLoad();
+        const entry = { day: iso, at: now(), manual: !!manual, count: 0, files: [], where: '', ok: false, note: '' };
+        try {
+            const from = fromIso(iso), to = from + DAY - 1;
+            const raw = await DS.fetchSessionsBetween(from, to);
+            const sids = Object.keys(raw).filter((k) => raw[k] && raw[k].startedAt);
+            const events = {};
+            for (let i = 0; i < sids.length; i += 20) { // đọc theo nhóm để không dồn quá nhiều request
+                const chunk = sids.slice(i, i + 20);
+                const vals = await Promise.all(chunk.map((sid) => DS.fetchEvents(sid).catch(() => ({}))));
+                chunk.forEach((sid, k) => { if (Object.keys(vals[k]).length) events[sid] = vals[k]; });
+            }
+            entry.count = sids.length;
+            const sessions = {}; sids.forEach((k) => { sessions[k] = raw[k]; });
+            const rows = sids.map((k) => Object.assign({ id: k }, raw[k])).sort((a, b) => a.startedAt - b.startedAt);
+            const base = BK.filePrefix + '_' + iso;
+            const files = [
+                { name: base + '.xls', mime: 'application/vnd.ms-excel', content: bkExcel(rows, iso) },
+                {
+                    name: base + '.json', mime: 'application/json', content: JSON.stringify({
+                        site: 'HoHai VN', root: CFG.root, day: iso, timezone: 'GMT+7', from, to, exportedAt: new Date(now()).toISOString(),
+                        counts: { sessions: sids.length, sessionsWithEvents: Object.keys(events).length }, sessions, events
+                    }, null, 2)
+                }
+            ];
+            entry.files = files.map((f) => f.name);
+            let saved = false;
+            if (BK_SERVER && (await bkCheckServer())) {
+                try { await bkSaveToServer(files); saved = true; entry.where = 'server'; }
+                catch (e) { entry.note = 'Server lỗi, đã tải về máy thay thế. '; }
+            }
+            if (!saved) { files.forEach((f) => downloadBlob(f.content, f.name, f.mime)); entry.where = 'download'; }
+            entry.ok = true;
+            if (!sids.length) entry.note += 'Không có lượt truy cập nào trong ngày.';
+            toast('Đã sao lưu ' + sids.length + ' lượt ngày ' + viDay(iso) + (entry.where === 'server' ? ' lên server.' : ' (tải về máy).'));
+        } catch (e) {
+            entry.note = 'Lỗi: ' + (e && (e.message || e.code) || 'không rõ');
+            toast('Sao lưu thất bại. ' + entry.note);
+        }
+        if (!manual) st.lastRunDay = isoDay(now());
+        st.history = [entry].concat(st.history || []).slice(0, BK.historyMax);
+        bkSave(st);
+        bkBusy = false; bkRender();
+    }
+
+    function bkTick() {
+        const st = bkLoad();
+        if (!st.enabled || bkBusy) return bkRender();
+        const today = isoDay(now());
+        if (st.lastRunDay !== today && now() >= bkTimeOf(now())) bkRun(isoDay(now() - BK.daysAgo * DAY), false);
+        else bkRender();
+    }
+
+    function bkRender(busyText) {
+        const st = bkLoad();
+        const tog = $('bk-toggle');
+        tog.setAttribute('aria-pressed', String(st.enabled));
+        tog.querySelector('span').textContent = st.enabled ? 'Đang bật' : 'Đã tắt';
+        $('bk-state').className = 'pill ' + (st.enabled ? 'pill-live' : '');
+        $('bk-state').textContent = busyText ? 'Đang chạy' : (st.enabled ? 'Đã bật' : 'Đã tắt');
+        $('bk-next').textContent = st.enabled ? dayLabel(bkNextRun()) + ' ' + hhmm(bkNextRun()) : '— (đang tắt)';
+        const last = (st.history || [])[0];
+        $('bk-last').textContent = busyText || (last ? dayLabel(last.at) + ' ' + hhmm(last.at) + ' · ngày ' + viDay(last.day) + ' · ' + fmtN(last.count) + ' lượt' : 'Chưa sao lưu lần nào');
+        const sv = $('bk-server');
+        if (!BK_SERVER) { sv.className = 'pill'; sv.textContent = 'Không dùng server · tải về máy'; }
+        else if (bkServerOk === null) { sv.className = 'pill'; sv.textContent = 'Server: đang kiểm tra…'; }
+        else if (bkServerOk) { sv.className = 'pill pill-live'; sv.textContent = 'Server: đang chạy'; }
+        else { sv.className = 'pill pill-warn'; sv.textContent = 'Server: không kết nối được · tải về máy'; }
+        $('bk-manual').disabled = !!busyText || bkBusy;
+        const hist = st.history || [];
+        $('bk-history').innerHTML = hist.length ? hist.slice(0, 10).map((h) => '<li class="' + (h.ok ? '' : 'bad') + '">' +
+            '<div><b>Ngày ' + esc(viDay(h.day)) + '</b> · ' + fmtN(h.count) + ' lượt · ' + (h.manual ? 'thủ công' : 'tự động') + '<div class="muted small">' +
+            esc(h.files.join(', ') || '—') + (h.note ? ' · ' + esc(h.note) : '') + '</div></div>' +
+            '<span class="muted small">' + (h.ok ? (h.where === 'server' ? 'Lên server' : 'Tải về máy') : 'Thất bại') + ' · ' + esc(dayLabel(h.at) + ' ' + hhmm(h.at)) + '</span></li>').join('')
+            : '<li class="empty muted">Chưa có lịch sử</li>';
+    }
+
+    function initBackup() {
+        $('bk-time').textContent = pad(BK.hour) + ':' + pad(BK.minute) + ' (giờ VN)';
+        $('bk-day').textContent = BK.daysAgo === 0 ? 'của hôm nay' : BK.daysAgo === 1 ? 'của ngày hôm trước' : 'của ' + BK.daysAgo + ' ngày trước';
+        $('bk-where').textContent = BK_SERVER ? 'thư mục backups/ trên server (không được thì tải về máy)' : 'thư mục Downloads của máy đang mở trang này';
+        $('bk-toggle').addEventListener('click', () => {
+            const st = bkLoad(); st.enabled = !st.enabled;
+            bkSave(st); bkRender();
+            toast(st.enabled ? 'Đã bật sao lưu tự động trên máy này.' : 'Đã tắt sao lưu tự động.');
+            if (st.enabled) setTimeout(bkTick, 500); // đã qua giờ hẹn mà hôm nay chưa sao lưu → chạy bù luôn
+        });
+        $('bk-manual').addEventListener('click', () => bkRun(isoDay(now() - DAY), true));
+        bkRender();
+        bkCheckServer().then(bkRender);
+        setTimeout(bkTick, 4000);           // chờ Firebase kết nối rồi mới kiểm tra
+        setInterval(bkTick, 60e3);          // kiểm tra mỗi phút (phòng khi tab bị ngủ lúc tới giờ)
     }
 
     /* =====================================================================
@@ -681,6 +852,7 @@
         $('scrim').addEventListener('click', closeDrawer);
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.openSid) closeDrawer(); });
         $('export-btn').addEventListener('click', exportCsv);
+        initBackup();
 
         let rTimer = null;
         window.addEventListener('resize', () => { clearTimeout(rTimer); rTimer = setTimeout(scheduleRender, 120); });

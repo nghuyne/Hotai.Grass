@@ -592,11 +592,24 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
 .logo .leaf { font-size: 22px; line-height: 1; display: inline-block; transform: translateY(-1px); }
 @media (max-width: 420px) { .logo { font-size: 16.5px; } .logo .leaf { font-size: 19px; } }
 
-/* ---------- Logo: logo Mgotoo đầy đủ + chữ grass.mgotoo ---------- */
-.logo { gap: 10px; }
-.logo .mark { display: block; height: 40px; width: auto; flex: none; }
-.hd.scrolled .logo .mark { height: 36px; }
-.ft .logo .mark { height: 44px; }
-/* Header trong suốt trên ảnh tối (trang chủ): logo đặt trên nền trắng bo góc cho dễ nhìn */
-.hd.on-dark:not(.scrolled) .logo .mark { background: rgba(255, 255, 255, .92); padding: 3px 8px; border-radius: 10px; box-sizing: content-box; }
-@media (max-width: 420px) { .logo .mark { height: 32px; } .logo { font-size: 15.5px; gap: 8px; } }
+/* ---------- Logo: logo Mgotoo (chính) | grass.mgotoo (phụ) ---------- */
+.logo { gap: 14px; }
+.logo .mark { display: block; height: 48px; width: auto; flex: none; transition: height .35s var(--ease); }
+.logo .logo-txt {
+    padding-left: 14px; border-left: 1px solid var(--line);
+    font-size: 14.5px; font-weight: 500; letter-spacing: .01em; color: var(--muted); line-height: 28px;
+}
+.hd.scrolled .logo .mark { height: 42px; }
+.ft .logo .mark { height: 54px; }
+/* Trang chủ: header trong suốt trên ảnh tối → cả cụm logo nằm trong 1 thẻ trắng */
+.hd.on-dark:not(.scrolled) .logo {
+    background: rgba(255, 255, 255, .95); padding: 6px 16px 6px 12px; border-radius: 16px;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, .18); color: var(--ink);
+}
+.hd.on-dark:not(.scrolled) .logo .mark { height: 44px; }
+@media (max-width: 600px) {
+    .logo { gap: 10px; }
+    .logo .mark, .hd.scrolled .logo .mark, .hd.on-dark:not(.scrolled) .logo .mark { height: 38px; }
+    .logo .logo-txt { font-size: 12.5px; padding-left: 10px; line-height: 22px; }
+}
+@media (max-width: 360px) { .logo .logo-txt { display: none; } }

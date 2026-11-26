@@ -1,0 +1,138 @@
+{
+  "_ghichu": "Dữ liệu sản phẩm dùng chung cho website (web-vn) và Zalo Mini App (zalo-miniapp). Sửa ở đây là cả hai cùng đổi. price = null nghĩa là 'báo giá qua Zalo'. Dấu * trong thông số: lấy từ website xuất khẩu, cần đối chiếu lô hàng bán tại Việt Nam.",
+  "version": 1,
+  "updated": "2026-11-26",
+  "contact": {
+    "phone": "0847131400",
+    "phoneDisplay": "0847 131 400",
+    "zaloPersonal": "https://zalo.me/0847131400",
+    "email": "triho@enjoymediavn.com"
+  },
+  "products": [
+    {
+      "id": "khay",
+      "name": "Khay vệ sinh cỏ 3 lớp",
+      "short": "Khay vệ sinh cỏ",
+      "tagline": "Nước tiểu chảy xuống khay hứng, mặt cỏ luôn khô, xịt rửa 3 phút.",
+      "badge": "Cho căn hộ · thay tã lót",
+      "image": "assets/img/khay-trang-nha-tam.webp",
+      "gallery": [
+        "assets/img/khay-trang-nha-tam.webp",
+        "assets/img/khay-3-lop.webp",
+        "assets/img/khay-do-nuoc.webp",
+        "assets/img/khay-den-phong-khach.webp"
+      ],
+      "page": "khay-ve-sinh-co.html",
+      "unit": "khay",
+      "price": null,
+      "options": {
+        "color": ["Trắng", "Đen"],
+        "size": [
+          { "id": "Nhỏ", "label": "Nhỏ", "note": "bé dưới 5kg", "price": null },
+          { "id": "Vừa", "label": "Vừa", "note": "bé 5–12kg", "price": null, "default": true },
+          { "id": "Lớn", "label": "Lớn", "note": "bé trên 12kg", "price": null }
+        ]
+      },
+      "highlights": [
+        "3 lớp tách rời: mặt cỏ, lưới đỡ, khay hứng",
+        "Nhận hàng, kiểm tra rồi mới trả tiền (COD)",
+        "Tặng thẻ hướng dẫn tập cho bé đi đúng chỗ"
+      ]
+    },
+    {
+      "id": "tham",
+      "name": "Thảm cỏ ban công",
+      "short": "Thảm cỏ ban công",
+      "tagline": "Biến ban công gạch nóng, trơn thành góc cỏ cho bé. Trải là dùng.",
+      "badge": "Cho ban công chung cư",
+      "image": "assets/img/minh-hoa-ban-cong-rong.webp",
+      "gallery": [
+        "assets/img/minh-hoa-ban-cong.webp",
+        "assets/img/minh-hoa-ban-cong-rong.webp",
+        "assets/img/cuon-co-that-hcm.webp"
+      ],
+      "page": "tham-co-ban-cong.html",
+      "unit": "tấm",
+      "price": null,
+      "options": {
+        "size": [
+          { "id": "1,33 × 2m", "label": "1,33 × 2m", "note": "Ban công nhỏ, lô gia 1–2PN", "a": 1.33, "b": 2, "area": "2,66 m²", "line": "Garden Soft, sợi mềm", "pile": null, "dtex": "9.500 Dtex*", "dens": "16.800 mũi/m²*", "drain": "> 100 L/phút/m²*", "warr": "7 năm", "unit": "tấm", "inbox": "Tấm thảm cỏ 1,33 × 2m", "price": null, "default": true },
+          { "id": "1,52 × 2,29m", "label": "1,52 × 2,29m", "note": "Ban công rộng, sân thượng nhỏ", "a": 1.52, "b": 2.29, "area": "3,48 m²", "line": "Đa dụng", "pile": null, "dtex": "9.500 Dtex*", "dens": "16.800 mũi/m²*", "drain": "> 100 L/phút/m²*", "warr": "7 năm", "unit": "tấm", "inbox": "Tấm thảm cỏ 1,52 × 2,29m", "price": null },
+          { "id": "1 × 5m", "label": "Cuộn 1 × 5m", "note": "Ban công dài hẹp, ghép cho sân thượng", "a": 1, "b": 5, "area": "5 m²", "line": "Cuộn thoát nước nhanh, lỗ cách 10cm", "pile": "30mm", "dtex": "11.000 Dtex*", "dens": "18.900 mũi/m²*", "drain": "> 120 L/phút/m²*", "warr": "8 năm", "unit": "cuộn", "inbox": "Cuộn cỏ 1 × 5m, sợi 30mm", "price": null }
+        ]
+      },
+      "highlights": [
+        "Sợi PE nguyên sinh nhiều tông xanh, mềm, chống UV",
+        "Đế đục lỗ thoát nước, xịt rửa tại chỗ",
+        "Cuộn lên được để lau sàn ban công"
+      ]
+    },
+    {
+      "id": "cuon",
+      "name": "Cuộn cỏ 1 × 5m, sợi 30mm",
+      "short": "Cuộn cỏ trại chó",
+      "tagline": "Thoát nước nhanh cho khu nuôi nhiều bé. Tặng mẫu dùng thử.",
+      "badge": "Trại chó · pet hotel · spa",
+      "image": "assets/img/cuon-co-that-hcm.webp",
+      "gallery": [
+        "assets/img/cuon-co-that-hcm.webp",
+        "assets/img/minh-hoa-thoat-nuoc.webp",
+        "assets/img/minh-hoa-khu-cho-con.webp"
+      ],
+      "page": "cuon-co-trai-cho.html",
+      "unit": "cuộn",
+      "price": null,
+      "options": {
+        "size": [
+          { "id": "1 × 5m", "label": "1 × 5m (5 m²)", "note": "Sợi 30mm, lỗ thoát nước cách 10cm", "a": 1, "b": 5, "price": null, "default": true }
+        ]
+      },
+      "highlights": [
+        "Lỗ thoát nước cách nhau 10cm, ráo nhanh",
+        "Bảo hành 5 năm cho trại chó, 8 năm cho gia đình",
+        "Mang mẫu 50 × 50cm tới tận cơ sở để thử"
+      ]
+    }
+  ],
+  "spaces": [
+    { "id": "indoor", "label": "Góc trong căn hộ", "image": "assets/img/khay-trang-nha-tam.webp", "askSize": false },
+    { "id": "balcony", "label": "Ban công chung cư", "image": "assets/img/minh-hoa-ban-cong.webp", "askSize": true },
+    { "id": "rooftop", "label": "Sân thượng, sân nhà phố", "image": "assets/img/stock-cho-san-co-chung-cu.webp", "askSize": true },
+    { "id": "business", "label": "Trại chó, pet hotel, spa", "image": "assets/img/stock-om-cho-con.webp", "askSize": false }
+  ],
+  "weights": [
+    { "id": "small", "label": "dưới 5kg" },
+    { "id": "medium", "label": "5–12kg" },
+    { "id": "large", "label": "trên 12kg" }
+  ],
+  "recommend": {
+    "_ghichu": "Luật gợi ý dùng chung cho công cụ chọn giải pháp (trang chủ web) và Mini App. {many} = nhà có từ 2 bé.",
+    "indoor": {
+      "product": "khay",
+      "title": { "small": "Khay vệ sinh cỏ 3 lớp, size Nhỏ", "medium": "Khay vệ sinh cỏ 3 lớp, size Vừa", "large": "Khay vệ sinh cỏ 3 lớp, size Lớn hoặc 2 khay", "many": "Khay vệ sinh cỏ 3 lớp, size Lớn hoặc 2 khay" },
+      "desc": "Đặt ở góc nhà hoặc nhà tắm. Nước tiểu chảy xuống khay hứng, mặt cỏ khô, không thấm ra sàn.",
+      "descOne": "Thay hẳn tã lót, đỡ mua mỗi tuần.",
+      "descMany": "Nhà nhiều bé nên có 2 khay để luân phiên xịt rửa.",
+      "image": "assets/img/khay-trang-nha-tam.webp"
+    },
+    "balcony": {
+      "product": "tham",
+      "title": { "small": "Thảm cỏ 1,33 × 2m + 1 khay vệ sinh ở góc", "medium": "Thảm cỏ 1,52 × 2,29m + 1 khay vệ sinh ở góc", "large": "Thảm cỏ 1,52 × 2,29m + 1 khay vệ sinh ở góc", "many": "Thảm cỏ 1,52 × 2,29m + 1 khay vệ sinh ở góc" },
+      "desc": "Thảm làm góc chơi, khay ở một góc để bé đi đúng chỗ, nước không chảy tràn sang ban công nhà bên. Gửi ảnh ban công để bên mình tính chính xác.",
+      "image": "assets/img/minh-hoa-ban-cong.webp"
+    },
+    "rooftop": {
+      "product": "tham",
+      "title": { "small": "Cuộn cỏ 1 × 5m, sợi 30mm", "medium": "Cuộn cỏ 1 × 5m, sợi 30mm", "large": "Cuộn cỏ 1 × 5m, sợi 30mm", "many": "Cuộn cỏ 1 × 5m, sợi 30mm" },
+      "desc": "Lỗ thoát nước dày, ráo nhanh sau mưa. Cắt theo kích thước sân, trải trực tiếp lên nền phẳng.",
+      "descLarge": "Bé lớn hay cào nên cố định mép thảm.",
+      "image": "assets/img/minh-hoa-ban-cong-rong.webp"
+    },
+    "business": {
+      "product": "cuon",
+      "title": { "small": "Cuộn cỏ 1 × 5m + mẫu 50 × 50cm miễn phí", "medium": "Cuộn cỏ 1 × 5m + mẫu 50 × 50cm miễn phí", "large": "Cuộn cỏ 1 × 5m + mẫu 50 × 50cm miễn phí", "many": "Cuộn cỏ 1 × 5m + mẫu 50 × 50cm miễn phí" },
+      "desc": "Cho khu chuồng, khu chơi, khu vệ sinh chung. Bên mình mang mẫu tới tận cơ sở để bạn thử trước khi đặt hàng.",
+      "image": "assets/img/cuon-co-that-hcm.webp"
+    }
+  }
+}

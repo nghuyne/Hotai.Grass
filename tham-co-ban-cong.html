@@ -226,15 +226,22 @@
     <div class="lb" role="dialog" aria-modal="true" aria-label="Xem ảnh"><button type="button" class="x" aria-label="Đóng">×</button><button type="button" class="p" aria-label="Ảnh trước">‹</button><figure><img src="" alt=""><figcaption></figcaption></figure><button type="button" class="n" aria-label="Ảnh sau">›</button></div>
     <div class="toast" role="status" aria-live="polite"></div>
 
+    <script src="js/products.js?v=1"></script>
     <script>
         (function () {
             var I = 'assets/img/', T = '<span class="tbd">đang cập nhật</span>';
-            /* Dấu * : lấy từ website xuất khẩu (1,33×2 & 1,52×2,29 ← dòng Balcony 25mm; 1×5m ← dòng MaxDrain 30mm) */
-            var S = {
-                '1,33 × 2m': { a: 1.33, b: 2, area: '2,66 m²', line: 'Garden Soft, sợi mềm', pile: T, dtex: '9.500 Dtex*', dens: '16.800 mũi/m²*', drain: '&gt; 100 L/phút/m²*', warr: '7 năm', unit: '/ tấm', inbox: 'Tấm thảm cỏ 1,33 × 2m' },
-                '1,52 × 2,29m': { a: 1.52, b: 2.29, area: '3,48 m²', line: 'Đa dụng', pile: T, dtex: '9.500 Dtex*', dens: '16.800 mũi/m²*', drain: '&gt; 100 L/phút/m²*', warr: '7 năm', unit: '/ tấm', inbox: 'Tấm thảm cỏ 1,52 × 2,29m' },
-                '1 × 5m': { a: 1, b: 5, area: '5 m²', line: 'Cuộn thoát nước nhanh, lỗ cách 10cm', pile: '30mm', dtex: '11.000 Dtex*', dens: '18.900 mũi/m²*', drain: '&gt; 120 L/phút/m²*', warr: '8 năm', unit: '/ cuộn', inbox: 'Cuộn cỏ 1 × 5m, sợi 30mm' }
-            };
+            /* Size, kích thước, thông số lấy từ data/products.json (sản phẩm "tham") — dùng chung với Zalo Mini App.
+               Dấu * : lấy từ website xuất khẩu (1,33×2 & 1,52×2,29 ← dòng Balcony 25mm; 1×5m ← dòng MaxDrain 30mm) */
+            var S = {};
+            var esc = function (v) { return String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); };
+            HOHAI_DATA.ready.then(function (d) {
+                var p = HOHAI_DATA.product(d, 'tham');
+                (p ? p.options.size : []).forEach(function (z) {
+                    S[z.id] = { a: z.a, b: z.b, area: z.area, line: z.line, pile: z.pile || T, dtex: z.dtex, dens: z.dens, drain: esc(z.drain), warr: z.warr, unit: '/ ' + z.unit, inbox: z.inbox };
+                });
+                if (window.DS && DS.state.size) render(DS.state.size);
+                calc();
+            });
             var $ = function (id) { return document.getElementById(id); };
             function render(k) {
                 var s = S[k]; if (!s) return;

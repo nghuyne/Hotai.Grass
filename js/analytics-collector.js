@@ -303,5 +303,26 @@
         });
     }, { passive: true });
 
-    window.HohaiMonitor = { log: logEvent, sessionId: function () { return sess.id; } };
+    /* ---------- 9. Yêu cầu tư vấn (nhánh CFG.leads.path, dùng chung với Zalo Mini App) ----------
+     * ds.js gọi HohaiMonitor.lead(...) khi khách bấm nút Zalo có nội dung soạn sẵn.
+     * Chỉ ghi khi CFG.leads.web === true (xem ghi chú trong monitor-config.js). */
+    var LEAD_SKIP = { chat: 1, hero: 1 }; // nút chat chung, không mang thông tin cụ thể
+    var lastLead = '';
+    function lead(kind, message, opts) {
+        var L = CFG.leads || {};
+        if (!L.web || !L.path || !message || LEAD_SKIP[kind]) return;
+        if (message === lastLead) return; // bấm lại cùng nội dung thì không ghi trùng
+        lastLead = message;
+        var o = {};
+        ['size', 'color', 'qty', 'weight', 'count'].forEach(function (k) { if (opts && opts[k] != null) o[k] = cut(opts[k], 40); });
+        run(function () {
+            db.ref(L.path).push({
+                channel: 'web', status: 'new', createdAt: TS,
+                kind: cut(kind || '', 30), page: page, message: cut(message, 1500), opts: o,
+                sid: sess.id, vid: visitorId
+            });
+        });
+    }
+
+    window.HohaiMonitor = { log: logEvent, lead: lead, sessionId: function () { return sess.id; } };
 })(window, document);

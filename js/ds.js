@@ -70,6 +70,8 @@
         e.preventDefault();
         var m = (PAGE.messages || {})[a.getAttribute('data-msg')];
         if (typeof m === 'function') m = m(state);
+        // Ghi yêu cầu tư vấn (chỉ khi bật trong monitor-config.js → leads.web)
+        if (m && window.HohaiMonitor && window.HohaiMonitor.lead) { try { window.HohaiMonitor.lead(a.getAttribute('data-msg'), m, state); } catch (err) { } }
         var go = function () { window.open(ZALO_LINK, '_blank', 'noopener'); };
         if (!m) return go();
         copy(m).then(function () { toast('Đã copy nội dung. Trong Zalo, bạn chỉ cần Dán và Gửi.'); })

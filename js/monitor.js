@@ -11,6 +11,7 @@
     'use strict';
 
     const CFG = window.HOHAI_MONITOR;
+    const LEADS_PATH = (CFG && CFG.leads && CFG.leads.path) || '';
     const DAY = 864e5, HOUR = 36e5, VN = 7 * HOUR;
     const ONLINE_FRESH = 75e3;           // tab đang hiển thị phải báo hiệu trong 75 giây gần nhất
     const PAGE_SIZE = 25;
@@ -164,6 +165,16 @@
                 return r('sessions').orderByChild('startedAt').startAt(from).endAt(to).once('value').then((s) => s.val() || {});
             },
             fetchEvents(sid) { return r('events/' + sid).once('value').then((s) => s.val() || {}); },
+            // Yêu cầu tư vấn (web + Zalo Mini App) — nhánh riêng CFG.leads.path, không nằm trong CFG.root
+            watchLeads(from, cb, err) {
+                if (!LEADS_PATH) { cb({}); return () => { }; }
+                const q = db.ref(LEADS_PATH).orderByChild('createdAt').startAt(from);
+                const h = q.on('value', (s) => cb(s.val() || {}), err || (() => cb({})));
+                return () => q.off('value', h);
+            },
+            setLeadStatus(id, status) {
+                return db.ref(LEADS_PATH + '/' + id).update({ status, statusAt: firebase.database.ServerValue.TIMESTAMP });
+            },
             watchEvents(sid, cb) {
                 const ref = r('events/' + sid);
                 const h = ref.on('value', (s) => cb(s.val() || {}), () => cb({}));
@@ -187,9 +198,10 @@
     const state = {
         range: 'today', filter: 'all', q: '', page: 0,
         sessions: {}, presence: {}, extra: {}, // extra: phiên online bắt đầu trước kỳ đang xem
+        leads: {}, leadFilter: 'new',
         openSid: null
     };
-    let DS = null, unSessions = null, unPresence = null, unEvents = null;
+    let DS = null, unSessions = null, unPresence = null, unEvents = null, unLeads = null;
     const fetching = new Set();
 
     function rangeInfo() {
@@ -264,6 +276,7 @@
         renderChart(rows, R);
         renderOnline();
         renderContacts(rows);
+        renderLeads(R);
         renderBreakdowns(rows);
         renderTable(rows);
     }
@@ -421,6 +434,50 @@
                 '<div class="c-via">' + (isPhone ? T('Bấm gọi', '点击电话') : T('Bấm Zalo', '点击 Zalo')) + ': “' + esc(via) + '”' + (s.contactPage ? T(' ở ', ' · 页面：') + esc(pageName(s.contactPage)) : '') + '</div>' +
                 '<div class="c-meta">' + esc(deviceName(s.device)) + ' · ' + esc(srcName(s.source)) + T(' · xem ', ' · 浏览 ') + esc(fmtDur(s.activeSec)) + ' · ' + (s.pageViews || 1) + T(' trang', ' 页') + '</div></span></li>';
         }).join('') : '<li class="empty">' + T('Chưa có khách nào bấm Zalo hoặc gọi điện trong khoảng thời gian này.', '该时间段内还没有访客点击 Zalo 或电话。') + '</li>';
+    }
+
+    /* ---------- Yêu cầu tư vấn (web + Zalo Mini App) ---------- */
+    const LEAD_KIND = {
+        consult: ['Tư vấn cho nhà tôi', '为我家推荐方案'], wizard: ['Gửi kết quả gợi ý', '发送推荐结果'], form: ['Form tư vấn', '咨询表单'],
+        order: ['Đặt hàng', '下单'], price: ['Hỏi giá', '询价'], fit: ['Tính số tấm', '计算所需块数'], quote: ['Báo giá theo diện tích', '按面积报价'],
+        sample: ['Xin mẫu dùng thử', '索取试用样品'], size: ['Hỏi chọn size', '咨询尺寸'], photo: ['Gửi ảnh báo giá', '发照片求报价'],
+        partner: ['Hợp tác đại lý', '代理合作'], program: ['Chương trình hợp tác', '合作计划'], claim: ['Yêu cầu bảo hành', '保修申请'],
+        support: ['Hỗ trợ sau mua', '售后支持'], data: ['Xin tài liệu', '索取资料']
+    };
+    const leadKind = (k) => (LEAD_KIND[k] ? pick(LEAD_KIND[k]) : k || T('Yêu cầu', '请求'));
+    const leadChannel = (c) => (c === 'miniapp' ? T('Zalo Mini App', 'Zalo 小程序') : T('Website', '网站'));
+
+    function renderLeads(R) {
+        const el = $('lead-list');
+        if (!el) return;
+        const all = Object.keys(state.leads).map((id) => Object.assign({ id }, state.leads[id]))
+            .filter((l) => l && typeof l.createdAt === 'number' && l.createdAt >= R.start && l.createdAt < R.end + 1)
+            .sort((a, b) => b.createdAt - a.createdAt);
+        const open = all.filter((l) => l.status !== 'done');
+        const shown = state.leadFilter === 'new' ? open : all;
+        $('lead-count').textContent = all.length ? T(open.length + ' chưa xử lý · ' + all.length + ' yêu cầu', open.length + ' 条待处理 · 共 ' + all.length + ' 条') : '';
+        document.querySelectorAll('#lead-tabs button').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.lf === state.leadFilter)));
+        if (!shown.length) {
+            el.innerHTML = '<li class="empty">' + (all.length ? T('Đã xử lý hết yêu cầu trong khoảng thời gian này.', '该时间段内的请求已全部处理。')
+                : T('Chưa có yêu cầu tư vấn trong khoảng thời gian này.', '该时间段内暂无咨询请求。')) + '</li>';
+            return;
+        }
+        el.innerHTML = shown.map((l) => {
+            const done = l.status === 'done';
+            const who = [l.name, l.phone ? '<a class="lead-tel" href="tel:' + esc(l.phone) + '">' + esc(l.phone) + '</a>' : ''].filter(Boolean);
+            const optTxt = l.opts ? Object.keys(l.opts).map((k) => esc(l.opts[k])).join(' · ') : '';
+            return '<li class="lead' + (done ? ' done' : '') + '">' +
+                '<div class="lead-top"><span class="tag ' + (l.channel === 'miniapp' ? 'tag-zalo' : 'tag-new') + '">' + esc(leadChannel(l.channel)) + '</span>' +
+                '<b>' + esc(leadKind(l.kind)) + '</b>' + (l.product ? '<span class="muted small">' + esc(l.product) + '</span>' : '') +
+                '<span class="lead-when">' + esc(relTime(l.createdAt)) + ' · ' + esc(hhmmss(l.createdAt)) + '</span></div>' +
+                (who.length ? '<div class="lead-who">' + who.map((w) => (w.indexOf('<a') === 0 ? w : esc(w))).join(' · ') + (l.phoneToken && !l.phone ? ' · <span class="muted small">' + T('SĐT Zalo: chờ giải mã', 'Zalo 手机号：待解析') + '</span>' : '') + '</div>' : '') +
+                (optTxt ? '<div class="muted small">' + optTxt + '</div>' : '') +
+                '<pre class="lead-msg">' + esc(l.message || '') + '</pre>' +
+                '<div class="lead-act">' + (l.page ? '<span class="muted small">' + T('Trang: ', '页面：') + esc(pageName(l.page)) + '</span>' : '') +
+                (l.sid ? '<button type="button" class="btn btn-ghost btn-sm" data-sid="' + esc(l.sid) + '">' + T('Xem lượt truy cập', '查看访问记录') + '</button>' : '') +
+                '<button type="button" class="btn ' + (done ? 'btn-ghost' : 'btn-primary') + ' btn-sm" data-lead="' + esc(l.id) + '" data-st="' + (done ? 'new' : 'done') + '">' +
+                (done ? T('Mở lại', '重新打开') : T('Đã liên hệ xong', '已联系完毕')) + '</button></div></li>';
+        }).join('');
     }
 
     /* ---------- Tỉ lệ theo nhóm ---------- */
@@ -892,6 +949,9 @@
         const R = rangeInfo();
         state.sessions = {};
         scheduleRender();
+        if (unLeads) unLeads();
+        state.leads = {};
+        unLeads = DS.watchLeads(R.start, (val) => { state.leads = val; scheduleRender(); });
         unSessions = DS.watchSessions(R.prevStart, (val) => { state.sessions = val; scheduleRender(); }, (err) => {
             setConn('read');
             toast(err && /permission/i.test(err.message || err.code || '') ? T('Firebase từ chối quyền đọc dữ liệu.', 'Firebase 拒绝了读取权限。') : T('Lỗi tải dữ liệu.', '数据加载出错。'));
@@ -997,6 +1057,18 @@
         $('scrim').addEventListener('click', closeDrawer);
         document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && state.openSid) closeDrawer(); });
         $('export-btn').addEventListener('click', exportCsv);
+        $('lead-tabs').addEventListener('click', (e) => {
+            const b = e.target.closest('button[data-lf]');
+            if (b) { state.leadFilter = b.dataset.lf; scheduleRender(); }
+        });
+        $('lead-list').addEventListener('click', (e) => {
+            const b = e.target.closest('button[data-lead]');
+            if (!b) return;
+            b.disabled = true;
+            DS.setLeadStatus(b.dataset.lead, b.dataset.st)
+                .then(() => toast(b.dataset.st === 'done' ? T('Đã đánh dấu đã liên hệ.', '已标记为已联系。') : T('Đã mở lại yêu cầu.', '已重新打开该请求。')))
+                .catch(() => { b.disabled = false; toast(T('Không cập nhật được (mất mạng hoặc bị chặn quyền).', '更新失败（网络断开或没有权限）。')); });
+        });
         initBackup();
 
         let rTimer = null;

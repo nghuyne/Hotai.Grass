@@ -16,6 +16,14 @@ window.HOHAI_MONITOR = {
     adminsPath: 'hohai_vn_admins',   // danh sách UID được xem dashboard (chỉ sửa trong Firebase Console)
     sdk: 'https://www.gstatic.com/firebasejs/9.23.0/',
 
+    // Yêu cầu tư vấn (khung "Yêu cầu tư vấn" trong analytics.html). Mini App và web cùng ghi vào nhánh này.
+    leads: {
+        path: 'hohai_vn_leads',
+        // Lưu yêu cầu khi khách bấm nút Zalo trên WEB. ĐANG TẮT vì chính sách bảo mật và ghi chú dưới form
+        // đang cam kết "website không lưu thông tin bạn nhập". Chỉ bật (true) sau khi đã sửa các nội dung đó.
+        web: false
+    },
+
     // Sao lưu tự động (khung "Sao lưu tự động" trong analytics.html)
     backup: {
         hour: 13, minute: 0,          // giờ chạy mỗi ngày, theo giờ Việt Nam

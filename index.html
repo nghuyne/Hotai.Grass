@@ -323,18 +323,22 @@
     <div class="mbar"><div class="t">Tư vấn miễn phí<b>Gửi ảnh, nhận báo giá</b></div><a href="#" class="btn btn-zalo btn-sm js-zalo" data-msg="hero"><span class="zalo-mark">Zalo</span>Nhắn ngay</a></div>
     <div class="toast" role="status" aria-live="polite"></div>
 
+    <script src="js/products.js?v=1"></script>
     <script>
         (function () {
             var space = 'indoor', step = 1;
-            var LABEL = { indoor: 'Góc trong căn hộ', balcony: 'Ban công chung cư', rooftop: 'Sân thượng, sân nhà phố', business: 'Trại chó, pet hotel, spa' };
-            var W = { small: 'dưới 5kg', medium: '5–12kg', large: 'trên 12kg' };
+            // Không gian, cân nặng và luật gợi ý lấy từ data/products.json (dùng chung với Zalo Mini App)
+            var D = null;
+            HOHAI_DATA.ready.then(function (d) { D = d; if (step === 3) go(3); });
+            var find = function (list, id) { for (var i = 0; list && i < list.length; i++) if (list[i].id === id) return list[i]; return null; };
+            var label = function (id) { var x = D && find(D.spaces, id); return x ? x.label : ''; };
+            var wlabel = function (id) { var x = D && find(D.weights, id); return x ? x.label : ''; };
             function st() { return window.DS ? DS.state : { weight: 'small', count: '1' }; }
             function rec() {
-                var s = st(), many = s.count !== '1';
-                if (space === 'indoor') return { t: 'Khay vệ sinh cỏ 3 lớp' + (s.weight === 'large' || many ? ', size Lớn hoặc 2 khay' : ', size ' + (s.weight === 'small' ? 'Nhỏ' : 'Vừa')), d: 'Đặt ở góc nhà hoặc nhà tắm. Nước tiểu chảy xuống khay hứng, mặt cỏ khô, không thấm ra sàn. ' + (many ? 'Nhà nhiều bé nên có 2 khay để luân phiên xịt rửa.' : 'Thay hẳn tã lót, đỡ mua mỗi tuần.'), l: 'khay-ve-sinh-co.html', i: 'assets/img/khay-trang-nha-tam.webp' };
-                if (space === 'balcony') return { t: 'Thảm cỏ ' + (s.weight === 'small' && !many ? '1,33 × 2m' : '1,52 × 2,29m') + ' + 1 khay vệ sinh ở góc', d: 'Thảm làm góc chơi, khay ở một góc để bé đi đúng chỗ, nước không chảy tràn sang ban công nhà bên. Gửi ảnh ban công để bên mình tính chính xác.', l: 'tham-co-ban-cong.html', i: 'assets/img/minh-hoa-ban-cong.webp' };
-                if (space === 'rooftop') return { t: 'Cuộn cỏ 1 × 5m, sợi 30mm', d: 'Lỗ thoát nước dày, ráo nhanh sau mưa. Cắt theo kích thước sân, trải trực tiếp lên nền phẳng.' + (s.weight === 'large' ? ' Bé lớn hay cào nên cố định mép thảm.' : ''), l: 'tham-co-ban-cong.html', i: 'assets/img/minh-hoa-ban-cong-rong.webp' };
-                return { t: 'Cuộn cỏ 1 × 5m + mẫu 50 × 50cm miễn phí', d: 'Cho khu chuồng, khu chơi, khu vệ sinh chung. Bên mình mang mẫu tới tận cơ sở để bạn thử trước khi đặt hàng.', l: 'cuon-co-trai-cho.html', i: 'assets/img/cuon-co-that-hcm.webp' };
+                var s = st();
+                var r = D && HOHAI_DATA.recommend(D, space, s.weight, s.count !== '1');
+                return r ? { t: r.title, d: r.desc, l: r.link, i: r.image }
+                    : { t: 'Đang tải gợi ý…', d: 'Nếu chờ lâu, bấm “Gửi kết quả qua Zalo” để bên mình tư vấn trực tiếp.', l: '#', i: 'assets/img/khay-trang-nha-tam.webp' };
             }
             var wiz = document.getElementById('wiz');
             var panes = wiz.querySelectorAll('.wiz-pane'), bars = wiz.querySelectorAll('.wiz-steps span');
@@ -347,7 +351,7 @@
                 next.textContent = n === 3 ? 'Chọn lại' : 'Tiếp tục';
                 if (n === 3) {
                     var r = rec();
-                    document.getElementById('rec-badge').textContent = 'Gợi ý cho: ' + LABEL[space];
+                    document.getElementById('rec-badge').textContent = 'Gợi ý cho: ' + label(space);
                     document.getElementById('rec-title').textContent = r.t;
                     document.getElementById('rec-desc').textContent = r.d;
                     document.getElementById('rec-link').href = r.l;
@@ -370,7 +374,7 @@
                     hero: 'Chào shop, mình gửi ảnh ban công/góc nhà, nhờ shop gợi ý size và báo giá giúp mình.',
                     wizard: function (s) {
                         var r = rec();
-                        return 'Chào shop, mình vừa dùng công cụ chọn giải pháp trên web:\n- Không gian: ' + LABEL[space] + '\n- Bé nặng: ' + W[s.weight] + '\n- Số bé: ' + s.count + '\n- Gợi ý: ' + r.t + '\nNhờ shop tư vấn và báo giá giúp mình.';
+                        return 'Chào shop, mình vừa dùng công cụ chọn giải pháp trên web:\n- Không gian: ' + label(space) + '\n- Bé nặng: ' + wlabel(s.weight) + '\n- Số bé: ' + s.count + '\n- Gợi ý: ' + r.t + '\nNhờ shop tư vấn và báo giá giúp mình.';
                     },
                     form: function () {
                         var l = ['Chào shop, mình cần tư vấn:'];

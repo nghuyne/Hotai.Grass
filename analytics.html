@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/monitor.css?v=5">
+    <link rel="stylesheet" href="css/monitor.css?v=6">
 </head>
 
 <body>
@@ -112,6 +112,21 @@
                     <span class="muted small" id="contacts-count"></span>
                 </div>
                 <ul class="contact-list" id="contact-list"></ul>
+            </section>
+
+            <!-- Yêu cầu tư vấn (web + Zalo Mini App) -->
+            <section class="card">
+                <div class="card-head">
+                    <h2 data-zh="咨询请求（网站 + Zalo 小程序）">Yêu cầu tư vấn (web + Zalo Mini App)</h2>
+                    <div class="lead-head-r">
+                        <span class="muted small" id="lead-count"></span>
+                        <div class="seg seg-lang" id="lead-tabs" role="tablist">
+                            <button type="button" role="tab" data-lf="new" aria-selected="true" data-zh="待处理">Chưa xử lý</button>
+                            <button type="button" role="tab" data-lf="all" aria-selected="false" data-zh="全部">Tất cả</button>
+                        </div>
+                    </div>
+                </div>
+                <ul class="lead-list" id="lead-list"></ul>
             </section>
 
             <!-- Phân tích -->
@@ -236,8 +251,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="js/monitor-config.js?v=4"></script>
-    <script src="js/monitor.js?v=5"></script>
+    <script src="js/monitor-config.js?v=5"></script>
+    <script src="js/monitor.js?v=6"></script>
 </body>
 
 </html>

@@ -49,6 +49,12 @@
         /bot|crawl|spider|slurp|lighthouse|headless|pagespeed|preview|facebookexternalhit|zalo.*link|monitor|curl|wget|python|node-fetch/i.test(ua);
     if (isBot || lsGet(LS_OFF) === '1' || path.indexOf('analytics') !== -1) return;
 
+    // Chỉ đo trên web thật: bỏ qua lúc mở file trực tiếp, xem trong VS Code, Live Server, localhost, IP mạng nội bộ
+    var host = (window.location.hostname || '').toLowerCase();
+    var isDev = !/^https?:$/.test(window.location.protocol) || !host ||
+        /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$)/.test(host) || /\.(local|test|localhost)$/.test(host);
+    if (isDev && qs.get('monitor') !== 'on') return;
+
     /* ---------- 1. Thông tin cơ bản ---------- */
     // ID khó đoán: mốc thời gian + 10 ký tự ngẫu nhiên (khớp quy tắc /^x_[a-z0-9]{10,30}$/ trong database.rules.json)
     function rid(p) {

@@ -5,7 +5,6 @@
  *   Lưu ý: đây chỉ là chặn ở giao diện — database Firebase vẫn để mở như web US.
  * - Đọc realtime: sessions (lọc theo startedAt), presence (đang online), events (khi mở chi tiết).
  * - Mọi mốc giờ hiển thị theo giờ Việt Nam (GMT+7), không phụ thuộc múi giờ máy đang xem.
- * - Xem trước giao diện bằng dữ liệu mẫu: mở http://localhost:<port>/analytics.html?demo=1 (chỉ chạy trên máy).
  * ---------------------------------------------------------------------------------
  */
 (function () {
@@ -97,10 +96,8 @@
     }
 
     /* =====================================================================
-     * 2. Nguồn dữ liệu: Firebase thật, hoặc dữ liệu mẫu khi xem trước
+     * 2. Nguồn dữ liệu: Firebase
      * ===================================================================== */
-    const isLocal = /^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname);
-    const isDemo = isLocal && new URLSearchParams(location.search).get('demo') === '1';
     let serverOffset = 0;
     const now = () => Date.now() + serverOffset;
 
@@ -134,91 +131,6 @@
                 u['sessions/' + sid] = null;
                 u['events/' + sid] = null;
                 return db.ref(CFG.root).update(u);
-            }
-        };
-    }
-
-    /* ---------- Dữ liệu mẫu (chỉ để xem trước giao diện trên máy) ---------- */
-    function demoSource() {
-        let seed = 7;
-        const rnd = () => { seed |= 0; seed = seed + 0x6D2B79F5 | 0; let t = Math.imul(seed ^ seed >>> 15, 1 | seed); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
-        const pick = (pairs) => { const tot = pairs.reduce((a, p) => a + p[1], 0); let x = rnd() * tot; for (const p of pairs) { if ((x -= p[1]) <= 0) return p[0]; } return pairs[0][0]; };
-        const T = Date.now();
-        const sessions = {}, events = {}, visitors = [];
-        const cities = [['Ho Chi Minh City', 45], ['Hanoi', 25], ['Da Nang', 8], ['Thu Dau Mot', 7], ['Can Tho', 5], ['Bien Hoa', 5], ['Haiphong', 5]];
-        const sources = [['Facebook', 40], ['Trực tiếp', 20], ['Zalo', 15], ['Google', 15], ['TikTok', 10]];
-        const landings = [['index', 45], ['khay-ve-sinh-co', 25], ['tham-co-ban-cong', 18], ['cuon-co-trai-cho', 12]];
-        const vias = ['Gửi ảnh ban công, nhận báo giá · hero', 'Tư vấn · chat', 'Đặt hàng qua Zalo · order', 'Xin mẫu dùng thử · sample', 'Gọi 0847131400'];
-        let n = 0;
-        for (let d = 59; d >= 0; d--) {
-            const day0 = vnDayStart(T) - d * DAY;
-            const dow = vnDate(day0).getUTCDay();
-            const count = Math.round((10 + rnd() * 14) * (dow === 0 || dow === 6 ? 1.3 : 1) * (1 + (59 - d) / 120));
-            for (let i = 0; i < count; i++) {
-                const hour = pick([[7, 2], [8, 3], [9, 4], [10, 4], [11, 5], [12, 6], [13, 4], [14, 4], [15, 4], [16, 4], [17, 5], [18, 6], [19, 8], [20, 10], [21, 10], [22, 7], [23, 3], [0, 1], [6, 1]]);
-                const start = day0 + hour * HOUR + Math.floor(rnd() * HOUR);
-                if (start > T - 60e3) continue;
-                const back = visitors.length > 5 && rnd() < 0.22;
-                const vid = back ? visitors[Math.floor(rnd() * visitors.length)] : 'v_demo' + (n++).toString(36) + 'xxxxxxxx';
-                if (!back) visitors.push(vid);
-                const sid = 's_demo' + start.toString(36) + i + 'aaaaaa';
-                const landing = pick(landings);
-                const pv = pick([[1, 40], [2, 25], [3, 15], [4, 10], [5, 6], [6, 4]]);
-                const active = Math.round(pv === 1 && rnd() < 0.5 ? rnd() * 12 : 15 + Math.exp(rnd() * 5.6));
-                const contacted = rnd() < 0.05 + pv * 0.025;
-                const via = vias[Math.floor(rnd() * vias.length)];
-                const pages = {}; pages[landing] = 1;
-                const all = Object.keys(PAGE_NAMES);
-                for (let k = 1; k < pv; k++) { const p = all[Math.floor(rnd() * 5)]; pages[p] = (pages[p] || 0) + 1; }
-                const device = pick([['Mobile', 72], ['Desktop', 22], ['Tablet', 6]]);
-                sessions[sid] = {
-                    visitorId: vid, startedAt: start, lastSeen: Math.min(T, start + active * 1000 + 20e3), returning: back,
-                    landing, page: landing, pages, pageViews: pv, activeSec: active, source: pick(sources), campaign: rnd() < 0.2 ? 'khay-ve-sinh-thang11' : '',
-                    referrer: '', device, os: device === 'Desktop' ? pick([['Windows', 7], ['macOS', 3]]) : pick([['Android', 6], ['iOS', 4]]),
-                    browser: pick([['Chrome', 5], ['Safari', 3], ['Facebook App', 3], ['Zalo', 2], ['Cốc Cốc', 1]]), screen: '390x844', lang: 'vi',
-                    ip: '113.161.' + Math.floor(rnd() * 255) + '.' + Math.floor(rnd() * 255), country: 'Vietnam', cc: 'VN', city: pick(cities), region: '',
-                    contacted, contactAt: contacted ? start + Math.round(active * 800) : undefined, contactVia: contacted ? via : undefined,
-                    contactPage: contacted ? landing : undefined, zaloClicks: contacted && !/^Gọi/.test(via) ? 1 : 0, phoneClicks: contacted && /^Gọi/.test(via) ? 1 : 0
-                };
-            }
-        }
-        const recent = Object.keys(sessions).sort((a, b) => sessions[b].startedAt - sessions[a].startedAt).slice(0, 4);
-        const presence = {};
-        recent.forEach((sid, i) => {
-            sessions[sid].lastSeen = T; sessions[sid].startedAt = T - (i + 1) * 4 * 60e3;
-            presence['t_demo' + i] = { sid, page: sessions[sid].landing, lastSeen: T - i * 5e3, visible: i < 3 };
-        });
-        function makeEvents(sid) {
-            const s = sessions[sid]; if (!s) return {};
-            const ev = {}; let t = s.startedAt, k = 0;
-            const add = (o) => { ev['e' + (k++)] = o; };
-            const pages = []; Object.keys(s.pages).forEach((p) => { for (let i = 0; i < s.pages[p]; i++) pages.push(p); });
-            pages.sort((a, b) => (a === s.landing ? -1 : b === s.landing ? 1 : 0));
-            const step = Math.max(8e3, (s.activeSec * 1000) / Math.max(1, pages.length));
-            pages.forEach((p, i) => {
-                add({ t: 'page_view', label: pageName(p), page: p, at: t });
-                if (i === 0 && s.activeSec > 20) add({ t: 'scroll', label: 'Cuộn 50% trang', page: p, at: t + step * 0.5 });
-                t += step;
-            });
-            if (s.contacted) add({ t: s.phoneClicks ? 'click_phone' : 'click_zalo', label: s.contactVia, page: s.contactPage, at: s.contactAt });
-            return ev;
-        }
-        let sessCb = null, sessFrom = 0, presCb = null;
-        const emit = () => {
-            if (sessCb) { const o = {}; Object.keys(sessions).forEach((k) => { if (sessions[k].startedAt >= sessFrom) o[k] = sessions[k]; }); sessCb(o); }
-            if (presCb) presCb(presence);
-        };
-        return {
-            onConn(cb) { setTimeout(() => cb(true), 200); },
-            watchSessions(from, cb) { sessFrom = from; sessCb = cb; setTimeout(emit, 150); return () => { sessCb = null; }; },
-            watchPresence(cb) { presCb = cb; setTimeout(emit, 150); return () => { presCb = null; }; },
-            fetchSession(sid) { return Promise.resolve(sessions[sid] || null); },
-            watchEvents(sid, cb) { setTimeout(() => cb(makeEvents(sid)), 80); return () => { }; },
-            visitorSessions(vid) { const o = {}; Object.keys(sessions).forEach((k) => { if (sessions[k].visitorId === vid) o[k] = sessions[k]; }); return Promise.resolve(o); },
-            deleteSession(sid) {
-                delete sessions[sid];
-                Object.keys(presence).forEach((k) => { if (presence[k].sid === sid) delete presence[k]; });
-                emit(); return Promise.resolve();
             }
         };
     }
@@ -786,11 +698,7 @@
         startApp();
     }
 
-    if (isDemo) {
-        DS = demoSource();
-        $('demo-bar').hidden = false;
-        startApp();
-    } else if (!window.firebase || !CFG) {
+    if (!window.firebase || !CFG) {
         $('screen-loading').innerHTML = '<p class="muted">Không tải được Firebase. Kiểm tra kết nối mạng hoặc tắt trình chặn quảng cáo rồi tải lại trang.</p>';
     } else {
         bootFirebase();

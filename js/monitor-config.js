@@ -16,6 +16,11 @@ window.HOHAI_MONITOR = {
     adminsPath: 'hohai_vn_admins',   // danh sách UID được xem dashboard (chỉ sửa trong Firebase Console)
     sdk: 'https://www.gstatic.com/firebasejs/9.23.0/',
 
+    // true: lượt vào web qua IP mạng nội bộ (192.168.x.x, 10.x.x.x…, vd. chạy CHAY-WEB.bat rồi máy khác trong công ty vào)
+    // được tính là khách thật. Đổi thành false khi web đã lên tên miền thật để lượt test trong công ty bị ẩn.
+    // (localhost, 127.0.0.1, mở file trực tiếp luôn là lượt chạy thử.)
+    lanIsLive: true,
+
     // Yêu cầu tư vấn (khung "Yêu cầu tư vấn" trong analytics.html). Mini App và web cùng ghi vào nhánh này.
     leads: {
         path: 'hohai_vn_leads',

@@ -50,14 +50,18 @@
     // Lượt chạy thử trên máy (mở file, VS Code, Live Server, localhost, IP mạng nội bộ) VẪN được ghi nhưng gắn env='dev'.
     // Trang giám sát mặc định chỉ hiện khách thật (env='live'), có nút xem lượt chạy thử để kiểm tra bộ thu thập.
     var host = (window.location.hostname || '').toLowerCase();
-    var isDev = !/^https?:$/.test(window.location.protocol) || !host ||
-        /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$)/.test(host) || /\.(local|test|localhost)$/.test(host);
-    var env = isDev ? 'dev' : 'live';
+    var isLocal = !/^https?:$/.test(window.location.protocol) || !host ||
+        /^(localhost|127\.|0\.0\.0\.0|\[?::1\]?$)/.test(host) || /\.(local|test|localhost)$/.test(host);
+    var isLan = /^(10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.)/.test(host);
+    // CFG.lanIsLive = true: chạy web trong mạng nội bộ (vd. http://192.168.1.88:8080) được tính như web thật
+    var isDev = isLocal || (isLan && !CFG.lanIsLive);
+    var env = isDev ? 'dev' : (isLan ? 'lan' : 'live');
 
     // Trình duyệt của admin (đã mở trang giám sát) không tính vào thống kê web thật.
     // Lúc chạy thử trên máy thì vẫn ghi (có nhãn dev) để kiểm tra được bộ thu thập.
     if (isBot || path.indexOf('analytics') !== -1) return;
-    if (lsGet(LS_OFF) === '1' && !isDev) return;
+    // Chỉ loại trình duyệt admin khi web đã lên tên miền thật; chạy trên máy / mạng nội bộ thì luôn ghi để test được.
+    if (lsGet(LS_OFF) === '1' && !isDev && !isLan) return;
 
     /* ---------- 1. Thông tin cơ bản ---------- */
     // ID khó đoán: mốc thời gian + 10 ký tự ngẫu nhiên (khớp quy tắc /^x_[a-z0-9]{10,30}$/ trong database.rules.json)

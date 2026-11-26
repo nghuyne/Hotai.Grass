@@ -65,14 +65,16 @@
         if (diff < 6 * HOUR) return Math.floor(diff / HOUR) + ' giờ trước';
         return dayLabel(ts) + ' ' + hhmm(ts);
     }
+    // Luôn giữ đủ số giây: 45 giây · 3 phút 05 giây · 1 giờ 02 phút 07 giây
     function fmtDur(sec) {
         sec = Math.max(0, Math.round(sec || 0));
         if (sec < 60) return sec + ' giây';
         const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60;
-        if (h) return h + ' giờ ' + (m ? m + ' phút' : '');
-        if (m >= 10 || !s) return m + ' phút';
-        return m + ' phút ' + s + ' giây';
+        if (h) return h + ' giờ ' + pad(m) + ' phút ' + pad(s) + ' giây';
+        return m + ' phút ' + pad(s) + ' giây';
     }
+    // Ngày giờ đầy đủ tới giây: 26/11/2026 14:05:09
+    const fullTime = (ts) => fullDate(ts) + ' ' + hhmmss(ts);
 
     const pageName = (k) => PAGE_NAMES[k] || k || '—';
     const deviceName = (d) => DEVICE_NAMES[d] || d || 'Không rõ';
@@ -454,7 +456,7 @@
                 (s.phoneClicks ? '<span class="tag tag-phone">Gọi' + (s.phoneClicks > 1 ? ' ×' + s.phoneClicks : '') + '</span>' : '')
                 : '<span class="tag tag-none">—</span>';
             return '<tr data-sid="' + esc(s.sid) + '">' +
-                '<td><div class="t-main">' + hhmm(s.startedAt) + '</div><div class="t-sub">' + esc(dayLabel(s.startedAt)) + '</div></td>' +
+                '<td><div class="t-main">' + hhmmss(s.startedAt) + '</div><div class="t-sub">' + esc(dayLabel(s.startedAt)) + '</div></td>' +
                 '<td><div class="t-main">' + (on[s.sid] ? '<span class="on-dot" title="Đang online"></span>' : '') + esc(place(s)) + '</div>' +
                 '<div class="t-sub"><span class="tag ' + (s.returning ? 'tag-back">Quay lại' : 'tag-new">Mới') + '</span></div></td>' +
                 '<td class="hide-sm"><div class="t-main">' + esc(deviceName(s.device)) + '</div><div class="t-sub">' + esc([s.os, s.browser].filter(Boolean).join(' · ')) + '</div></td>' +
@@ -481,15 +483,19 @@
         $('drawer').setAttribute('aria-hidden', 'false');
         document.body.style.overflow = 'hidden';
         const s = sessionOf(sid);
-        if (s) renderDrawer(sid, s, null, null);
-        else {
-            $('d-body').innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
-            DS.fetchSession(sid).then((x) => { if (x) { state.extra[sid] = x; renderDrawer(sid, x, null, null); } else $('d-body').innerHTML = '<p class="empty">Không tìm thấy dữ liệu (có thể đã bị xoá).</p>'; });
-        }
         if (unEvents) unEvents();
         let evs = null, visits = null;
-        unEvents = DS.watchEvents(sid, (v) => { evs = v; if (state.openSid === sid) renderDrawer(sid, sessionOf(sid), evs, visits); });
-        if (s && s.visitorId) DS.visitorSessions(s.visitorId).then((v) => { visits = v; if (state.openSid === sid) renderDrawer(sid, sessionOf(sid), evs, visits); }).catch(() => { });
+        const redraw = () => { if (state.openSid === sid) renderDrawer(sid, sessionOf(sid), evs, visits); };
+        const loadVisits = (x) => {
+            if (!x || !x.visitorId) { visits = {}; redraw(); return; }
+            DS.visitorSessions(x.visitorId).then((v) => { visits = v; redraw(); }).catch(() => { visits = {}; redraw(); });
+        };
+        if (s) { renderDrawer(sid, s, null, null); loadVisits(s); }
+        else {
+            $('d-body').innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
+            DS.fetchSession(sid).then((x) => { if (x) { state.extra[sid] = x; renderDrawer(sid, x, evs, null); loadVisits(x); } else $('d-body').innerHTML = '<p class="empty">Không tìm thấy dữ liệu (có thể đã bị xoá).</p>'; });
+        }
+        unEvents = DS.watchEvents(sid, (v) => { evs = v; redraw(); });
         setTimeout(() => $('d-close').focus(), 50);
     }
 
@@ -506,7 +512,7 @@
         if (!s) return;
         const on = onlineMap()[sid];
         $('d-title').textContent = place(s);
-        $('d-sub').innerHTML = esc(dayLabel(s.startedAt) + ' lúc ' + hhmm(s.startedAt)) + (on ? ' · <b style="color:var(--up)">' + (on.active ? 'Đang xem web' : 'Mở ở tab nền') + '</b>' : '');
+        $('d-sub').innerHTML = esc(dayLabel(s.startedAt) + ' lúc ' + hhmmss(s.startedAt)) + (on ? ' · <b style="color:var(--up)">' + (on.active ? 'Đang xem web' : 'Mở ở tab nền') + '</b>' : '');
 
         let refHost = '';
         try { refHost = s.referrer ? new URL(s.referrer).hostname : ''; } catch (e) { refHost = ''; }
@@ -517,13 +523,46 @@
             fact('Trang vào đầu tiên', esc(pageName(s.landing))) +
             fact('Số trang đã xem', (s.pageViews || 1) + ' trang') +
             fact('Thời gian xem thực', esc(fmtDur(s.activeSec))) +
-            fact('Hoạt động cuối', s.lastSeen ? esc(hhmm(s.lastSeen) + ', ' + dayLabel(s.lastSeen)) : '—') +
+            fact('Hoạt động cuối', s.lastSeen ? esc(hhmmss(s.lastSeen) + ', ' + dayLabel(s.lastSeen)) : '—') +
             fact('Thiết bị', esc(deviceName(s.device)) + '<div class="small muted">' + esc([s.os, s.browser, s.screen].filter(Boolean).join(' · ')) + '</div>') +
             fact('Vị trí (theo IP)', esc([viPlace(s.city), viPlace(s.region), viPlace(s.country)].filter(Boolean).join(', ') || '—') + '<div class="small muted">IP ' + esc(s.ip || 'chưa có') + '</div>') +
-            (s.contacted ? fact('Liên hệ', '<b>' + esc((s.contactVia || '').replace(/ · [a-z]+$/, '') || 'Có') + '</b><div class="small muted">' + esc(s.contactAt ? hhmm(s.contactAt) : '') + (s.contactPage ? ' · ở ' + esc(pageName(s.contactPage)) : '') + '</div>', true) : '') +
+            (s.contacted ? fact('Liên hệ', '<b>' + esc((s.contactVia || '').replace(/ · [a-z]+$/, '') || 'Có') + '</b><div class="small muted">' + esc(s.contactAt ? hhmmss(s.contactAt) : '') + (s.contactPage ? ' · ở ' + esc(pageName(s.contactPage)) : '') + '</div>', true) : '') +
             '</dl>';
 
-        html += '<section><div class="section-title">Hành trình</div>';
+        // Lịch sử ghé thăm của cùng 1 khách (cùng trình duyệt/thiết bị): vào lúc nào, mấy lần
+        html += '<section><div class="section-title">Lịch sử ghé thăm</div>';
+        if (!visits) html += '<p class="muted small">Đang tải…</p>';
+        else {
+            const vs = Object.keys(visits).map((k) => Object.assign({ sid: k }, visits[k])).filter((v) => v.startedAt);
+            if (!vs.some((v) => v.sid === sid)) vs.push(Object.assign({ sid }, s));
+            vs.sort((a, b) => a.startedAt - b.startedAt);
+            vs.forEach((v, i) => { v.n = i + 1; });
+            const idx = vs.findIndex((v) => v.sid === sid) + 1;
+            const total = vs.length;
+            const sumSec = vs.reduce((a, v) => a + (v.activeSec || 0), 0);
+            const contacts = vs.filter((v) => v.contacted).length;
+            const first = vs[0], last = vs[total - 1];
+            html += '<div class="visit-sum">' +
+                '<div><b>' + total + '</b><span>lần vào web</span></div>' +
+                '<div><b>' + esc(fmtDur(sumSec)) + '</b><span>tổng thời gian xem</span></div>' +
+                '<div><b>' + contacts + '</b><span>lần có liên hệ</span></div>' +
+                '</div>' +
+                '<p class="small muted visit-range">' + (total > 1
+                    ? 'Lần đầu: <b>' + esc(fullTime(first.startedAt)) + '</b> · Gần nhất: <b>' + esc(fullTime(last.startedAt)) + '</b> · Lượt đang xem là <b>lần thứ ' + idx + '</b>.'
+                    : 'Đây là lần đầu khách này vào web (<b>' + esc(fullTime(s.startedAt)) + '</b>).') + '</p>';
+            if (total > 1) {
+                html += '<ol class="other-visits">' + vs.slice().reverse().map((v) => '<li data-sid="' + esc(v.sid) + '"' + (v.sid === sid ? ' class="cur"' : '') + '>' +
+                    '<span class="v-n">Lần ' + v.n + '</span>' +
+                    '<span class="v-main"><b>' + esc(fullTime(v.startedAt)) + '</b>' +
+                    '<span class="small muted">' + esc([v.source || '—', pageName(v.landing), (v.pageViews || 1) + ' trang', 'xem ' + fmtDur(v.activeSec)].join(' · ')) + '</span></span>' +
+                    (v.contacted ? '<span class="tag tag-zalo">Đã liên hệ</span>' : '') +
+                    (v.sid === sid ? '<span class="tag tag-new">Đang xem</span>' : '') + '</li>').join('') + '</ol>';
+                if (total >= 50) html += '<p class="small muted">Chỉ hiện 50 lượt gần nhất.</p>';
+            }
+        }
+        html += '</section>';
+
+        html += '<section><div class="section-title">Hành trình lượt này</div>';
         if (!evs) html += '<p class="muted small">Đang tải…</p>';
         else {
             const list = Object.values(evs).filter((e) => e && e.at).sort((a, b) => a.at - b.at);
@@ -543,15 +582,6 @@
             }).join('') + '</ul>' : '<p class="muted small">Không có hành động nào được ghi lại.</p>';
         }
         html += '</section>';
-
-        if (visits) {
-            const vs = Object.keys(visits).map((k) => Object.assign({ sid: k }, visits[k])).filter((v) => v.startedAt).sort((a, b) => b.startedAt - a.startedAt);
-            if (vs.length > 1) {
-                html += '<section><div class="section-title">Các lượt ghé của khách này (' + vs.length + ')</div><ul class="other-visits">' +
-                    vs.map((v) => '<li data-sid="' + esc(v.sid) + '"' + (v.sid === sid ? ' class="cur"' : '') + '><span>' + esc(dayLabel(v.startedAt) + ' ' + hhmm(v.startedAt)) + ' · ' + (v.pageViews || 1) + ' trang · ' + esc(fmtDur(v.activeSec)) + '</span>' +
-                        (v.contacted ? '<span class="tag tag-zalo">Đã liên hệ</span>' : '') + '</li>').join('') + '</ul></section>';
-            }
-        }
 
         html += '<div class="danger-zone"><span class="small muted">Xoá vĩnh viễn lượt truy cập này và hành trình của nó.</span>' +
             '<form class="pin-form" id="d-delete-form" autocomplete="off"><input class="pin-input" id="d-pin" type="password" inputmode="numeric" maxlength="8" placeholder="Mã PIN" aria-label="Mã PIN để xoá">' +

@@ -216,13 +216,31 @@
         return { start: R[0], end: R[1], prevStart: R[2], prevEnd: R[3], title: pick(RT.title), cmp: pick(RT.cmp), bucket: RT.bucket };
     }
 
+    // Lượt chạy thử trên máy (Live Server, mở file, localhost…): bộ thu thập gắn env='dev';
+    // dữ liệu cũ chưa có env thì nhận theo origin.
+    const DEV_ORIGIN = /^(file:|vscode-webview:|https?:\/\/(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[::1\]))/;
+    const isTest = (s) => !!s && (s.env === 'dev' || (!s.env && DEV_ORIGIN.test(s.origin || '')));
+    const LS_SHOW_TEST = 'hohai_vn_monitor_show_test';
+    state.showTest = (() => { try { return localStorage.getItem(LS_SHOW_TEST) === '1'; } catch (e) { return false; } })();
+    let hiddenTest = 0;
+
     function list(from, to) {
         const out = [];
         for (const sid in state.sessions) {
             const s = state.sessions[sid];
-            if (s && typeof s.startedAt === 'number' && s.startedAt >= from && s.startedAt < to) out.push(Object.assign({ sid }, s));
+            if (!(s && typeof s.startedAt === 'number' && s.startedAt >= from && s.startedAt < to)) continue;
+            if (!state.showTest && isTest(s)) continue;
+            out.push(Object.assign({ sid }, s));
         }
         return out.sort((a, b) => b.startedAt - a.startedAt);
+    }
+    function countHiddenTest(from, to) {
+        let n = 0;
+        for (const sid in state.sessions) {
+            const s = state.sessions[sid];
+            if (s && s.startedAt >= from && s.startedAt < to && isTest(s)) n++;
+        }
+        return n;
     }
 
     function metrics(rows) {
@@ -246,6 +264,7 @@
         for (const k in state.presence) {
             const p = state.presence[k];
             if (!p || !p.sid) continue;
+            if (!state.showTest && isTest(sessionOf(p.sid))) continue;
             const active = p.visible !== false && t - (p.lastSeen || 0) < ONLINE_FRESH;
             const cur = by[p.sid];
             if (!cur || (active && !cur.active)) by[p.sid] = { sid: p.sid, page: p.page, active, lastSeen: p.lastSeen };
@@ -279,6 +298,26 @@
         renderLeads(R);
         renderBreakdowns(rows);
         renderTable(rows);
+        renderNotice(R);
+    }
+
+    /* ---------- Thông báo: lượt chạy thử đang ẩn, trình duyệt admin không được tính ---------- */
+    function renderNotice(R) {
+        const el = $('data-notice');
+        if (!el) return;
+        hiddenTest = state.showTest ? 0 : countHiddenTest(R.start, R.end + 1);
+        const testOn = state.showTest ? countHiddenTest(R.start, R.end + 1) : 0;
+        let off = false;
+        try { off = localStorage.getItem(LS_OFF) === '1'; } catch (e) { }
+        const parts = [];
+        if (hiddenTest) parts.push('<span>' + T('Đang ẩn <b>' + hiddenTest + '</b> lượt chạy thử trên máy (Live Server, mở file, localhost).', '已隐藏 <b>' + hiddenTest + '</b> 条本机测试访问（Live Server、本地文件、localhost）。') +
+            ' <button type="button" class="link-btn" data-act="show-test">' + T('Hiện', '显示') + '</button></span>');
+        if (state.showTest) parts.push('<span>' + T('Đang hiện cả lượt chạy thử (' + testOn + ' lượt, có nhãn “Test”).', '正在显示测试访问（' + testOn + ' 条，标记为“测试”）。') +
+            ' <button type="button" class="link-btn" data-act="hide-test">' + T('Chỉ xem khách thật', '只看真实访客') + '</button></span>');
+        if (off) parts.push('<span>' + T('Trình duyệt này không được tính vào thống kê web thật vì đã mở trang giám sát.', '本浏览器打开过监控页面，因此不计入网站真实统计。') +
+            ' <button type="button" class="link-btn" data-act="count-me">' + T('Tính cả trình duyệt này', '也统计本浏览器') + '</button></span>');
+        el.hidden = !parts.length;
+        el.innerHTML = parts.join('');
     }
 
     function delta(cur, prev, R, invert) {
@@ -557,7 +596,8 @@
             return '<tr data-sid="' + esc(s.sid) + '">' +
                 '<td><div class="t-main">' + hhmmss(s.startedAt) + '</div><div class="t-sub">' + esc(dayLabel(s.startedAt)) + '</div></td>' +
                 '<td><div class="t-main">' + (on[s.sid] ? '<span class="on-dot" title="' + T('Đang online', '在线') + '"></span>' : '') + esc(place(s)) + '</div>' +
-                '<div class="t-sub"><span class="tag ' + (s.returning ? 'tag-back">' + T('Quay lại', '回访') : 'tag-new">' + T('Mới', '新访客')) + '</span></div></td>' +
+                '<div class="t-sub"><span class="tag ' + (s.returning ? 'tag-back">' + T('Quay lại', '回访') : 'tag-new">' + T('Mới', '新访客')) + '</span>' +
+                (isTest(s) ? ' <span class="tag tag-test" title="' + esc(s.origin || '') + '">' + T('Test', '测试') + '</span>' : '') + '</div></td>' +
                 '<td class="hide-sm"><div class="t-main">' + esc(deviceName(s.device)) + '</div><div class="t-sub">' + esc([s.os, s.browser].filter(Boolean).join(' · ')) + '</div></td>' +
                 '<td><div class="t-main">' + esc(srcName(s.source)) + '</div><div class="t-sub">' + esc(s.campaign || '') + '</div></td>' +
                 '<td class="hide-sm"><div class="t-main">' + esc(pageName(s.landing)) + '</div><div class="t-sub">' + (s.pageViews || 1) + T(' trang', ' 页') + '</div></td>' +
@@ -1006,7 +1046,22 @@
         show('screen-app');
         if (appStarted) return;
         appStarted = true;
-        try { localStorage.setItem(LS_OFF, '1'); } catch (e) { } // máy đã mở dashboard thì không tính vào thống kê web
+        // Máy đã mở dashboard thì mặc định không tính vào thống kê web thật ('1').
+        // Bấm "Tính cả trình duyệt này" sẽ lưu '0' và không bị ghi đè lại khi mở dashboard lần sau.
+        try { if (localStorage.getItem(LS_OFF) === null) localStorage.setItem(LS_OFF, '1'); } catch (e) { }
+        $('data-notice').addEventListener('click', (e) => {
+            const b = e.target.closest('[data-act]');
+            if (!b) return;
+            const act = b.dataset.act;
+            if (act === 'show-test' || act === 'hide-test') {
+                state.showTest = act === 'show-test';
+                try { localStorage.setItem(LS_SHOW_TEST, state.showTest ? '1' : '0'); } catch (err) { }
+            } else if (act === 'count-me') {
+                try { localStorage.setItem(LS_OFF, '0'); } catch (err) { }
+                toast(T('Từ giờ trình duyệt này được tính vào thống kê.', '从现在起本浏览器计入统计。'));
+            }
+            scheduleRender();
+        });
 
         applyStaticLang();
         setConn();

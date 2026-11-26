@@ -41,19 +41,23 @@
 
     var qs = new URLSearchParams(window.location.search || '');
     if (qs.get('monitor') === 'off') lsSet(LS_OFF, '1');
-    if (qs.get('monitor') === 'on') { try { LS && LS.removeItem(LS_OFF); } catch (e) { } }
+    if (qs.get('monitor') === 'on') lsSet(LS_OFF, '0'); // '0' = đã chủ động bật lại, dashboard không ghi đè
 
     var path = (window.location.pathname || '').toLowerCase();
     var ua = navigator.userAgent || '';
     var isBot = navigator.webdriver ||
         /bot|crawl|spider|slurp|lighthouse|headless|pagespeed|preview|facebookexternalhit|zalo.*link|monitor|curl|wget|python|node-fetch/i.test(ua);
-    if (isBot || lsGet(LS_OFF) === '1' || path.indexOf('analytics') !== -1) return;
-
-    // Chỉ đo trên web thật: bỏ qua lúc mở file trực tiếp, xem trong VS Code, Live Server, localhost, IP mạng nội bộ
+    // Lượt chạy thử trên máy (mở file, VS Code, Live Server, localhost, IP mạng nội bộ) VẪN được ghi nhưng gắn env='dev'.
+    // Trang giám sát mặc định chỉ hiện khách thật (env='live'), có nút xem lượt chạy thử để kiểm tra bộ thu thập.
     var host = (window.location.hostname || '').toLowerCase();
     var isDev = !/^https?:$/.test(window.location.protocol) || !host ||
         /^(localhost|127\.|0\.0\.0\.0|10\.|192\.168\.|172\.(1[6-9]|2\d|3[01])\.|\[?::1\]?$)/.test(host) || /\.(local|test|localhost)$/.test(host);
-    if (isDev && qs.get('monitor') !== 'on') return;
+    var env = isDev ? 'dev' : 'live';
+
+    // Trình duyệt của admin (đã mở trang giám sát) không tính vào thống kê web thật.
+    // Lúc chạy thử trên máy thì vẫn ghi (có nhãn dev) để kiểm tra được bộ thu thập.
+    if (isBot || path.indexOf('analytics') !== -1) return;
+    if (lsGet(LS_OFF) === '1' && !isDev) return;
 
     /* ---------- 1. Thông tin cơ bản ---------- */
     // ID khó đoán: mốc thời gian + 10 ký tự ngẫu nhiên (khớp quy tắc /^x_[a-z0-9]{10,30}$/ trong database.rules.json)
@@ -164,7 +168,8 @@
             visitorId: visitorId,
             lastSeen: TS,
             page: page,
-            origin: cut(window.location.origin, 100)
+            origin: cut(window.location.origin, 100),
+            env: env
         };
         upd['pages/' + page] = INC(1);
         upd.pageViews = INC(1);

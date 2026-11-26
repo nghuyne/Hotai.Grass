@@ -587,7 +587,11 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
 .ft-legal { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); font-size: 13px; line-height: 1.7; color: var(--muted); }
 .ft-legal b { color: var(--ink-2); font-weight: 600; }
 
-/* ---------- Logo (giống site Mỹ: 🌿 grass.hohai.ltd) ---------- */
+/* ---------- Logo (chữ + biểu tượng) ---------- */
 .logo { gap: 8px; font-size: 19px; font-weight: 700; letter-spacing: -.01em; }
 .logo .leaf { font-size: 22px; line-height: 1; display: inline-block; transform: translateY(-1px); }
 @media (max-width: 420px) { .logo { font-size: 16.5px; } .logo .leaf { font-size: 19px; } }
+
+/* ---------- Logo: chữ M Mgotoo + grass.mgotoo.com ---------- */
+.logo .mark { display: block; height: 32px; width: auto; flex: none; }
+@media (max-width: 420px) { .logo .mark { height: 28px; } }

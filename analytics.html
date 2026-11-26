@@ -11,13 +11,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/monitor.css?v=4">
+    <link rel="stylesheet" href="css/monitor.css?v=5">
 </head>
 
 <body>
     <!-- ============ Đang tải ============ -->
     <div id="screen-loading" class="gate">
-        <div class="spinner" aria-label="Đang tải"></div>
+        <div class="spinner" aria-label="Đang tải" data-zh-aria="加载中"></div>
     </div>
 
     <!-- ============ Dashboard ============ -->
@@ -27,21 +27,22 @@
                 <div class="brand">
                     <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M7 20h4l3-8 4 12 3-6h4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
                     <div>
-                        <div class="brand-name">Giám sát truy cập</div>
-                        <div class="brand-sub">HoHai Việt Nam</div>
+                        <div class="brand-name" data-zh="访问监控">Giám sát truy cập</div>
+                        <div class="brand-sub" data-zh="HoHai 越南站">HoHai Việt Nam</div>
                     </div>
                 </div>
 
-                <div class="seg" role="tablist" aria-label="Khoảng thời gian" id="range-seg">
-                    <button role="tab" data-range="today" aria-selected="true">Hôm nay</button>
-                    <button role="tab" data-range="yesterday" aria-selected="false">Hôm qua</button>
-                    <button role="tab" data-range="7d" aria-selected="false">7 ngày</button>
-                    <button role="tab" data-range="30d" aria-selected="false">30 ngày</button>
+                <div class="seg" role="tablist" aria-label="Khoảng thời gian" data-zh-aria="时间范围" id="range-seg">
+                    <button role="tab" data-range="today" aria-selected="true" data-zh="今天">Hôm nay</button>
+                    <button role="tab" data-range="yesterday" aria-selected="false" data-zh="昨天">Hôm qua</button>
+                    <button role="tab" data-range="7d" aria-selected="false" data-zh="7 天">7 ngày</button>
+                    <button role="tab" data-range="30d" aria-selected="false" data-zh="30 天">30 ngày</button>
                 </div>
 
                 <div class="top-right">
+                    <div class="seg seg-lang" id="lang-seg" role="group" aria-label="Ngôn ngữ / 语言"><button type="button" data-lang="vi" aria-pressed="true" title="Tiếng Việt">VI</button><button type="button" data-lang="zh" aria-pressed="false" title="中文">中文</button></div>
                     <span class="conn" id="conn"><span class="dot"></span><span id="conn-text">Đang kết nối…</span></span>
-                    <a class="btn btn-ghost btn-sm" href="index.html" target="_blank" rel="noopener">Mở website ↗</a>
+                    <a class="btn btn-ghost btn-sm" href="index.html" target="_blank" rel="noopener" data-zh="打开网站 ↗">Mở website ↗</a>
                 </div>
             </div>
         </header>
@@ -54,29 +55,29 @@
             </div>
 
             <!-- Chỉ số chính -->
-            <section class="kpis" aria-label="Chỉ số chính">
+            <section class="kpis" aria-label="Chỉ số chính" data-zh-aria="主要指标">
                 <article class="kpi kpi-live">
-                    <div class="kpi-label"><span class="live-dot"></span>Đang xem web</div>
+                    <div class="kpi-label"><span class="live-dot"></span><span data-zh="正在浏览">Đang xem web</span></div>
                     <div class="kpi-value" id="k-online" aria-live="polite">0</div>
-                    <div class="kpi-sub" id="k-online-sub">Chưa có ai</div>
+                    <div class="kpi-sub" id="k-online-sub"></div>
                 </article>
                 <article class="kpi">
-                    <div class="kpi-label">Lượt truy cập</div>
+                    <div class="kpi-label" data-zh="访问次数">Lượt truy cập</div>
                     <div class="kpi-value" id="k-sessions">0</div>
                     <div class="kpi-sub" id="k-sessions-sub"></div>
                 </article>
                 <article class="kpi">
-                    <div class="kpi-label">Khách</div>
+                    <div class="kpi-label" data-zh="访客">Khách</div>
                     <div class="kpi-value" id="k-visitors">0</div>
                     <div class="kpi-sub" id="k-visitors-sub"></div>
                 </article>
                 <article class="kpi kpi-contact">
-                    <div class="kpi-label">Liên hệ Zalo / Gọi</div>
+                    <div class="kpi-label" data-zh="Zalo / 电话咨询">Liên hệ Zalo / Gọi</div>
                     <div class="kpi-value" id="k-contacts">0</div>
                     <div class="kpi-sub" id="k-contacts-sub"></div>
                 </article>
                 <article class="kpi">
-                    <div class="kpi-label">Thời gian xem TB <span class="info" tabindex="0" data-tip="Chỉ tính lúc khách đang mở tab và có thao tác (cuộn, chạm, rê chuột). Không tính lúc treo máy hay chuyển sang tab khác.">?</span></div>
+                    <div class="kpi-label"><span data-zh="平均浏览时长">Thời gian xem TB</span> <span class="info" tabindex="0" data-zh-tip="仅统计访客打开页面并有操作（滚动、点击、移动鼠标）的时间，不计挂机或切换到其他标签页的时间。" data-tip="Chỉ tính lúc khách đang mở tab và có thao tác (cuộn, chạm, rê chuột). Không tính lúc treo máy hay chuyển sang tab khác.">?</span></div>
                     <div class="kpi-value" id="k-time">0s</div>
                     <div class="kpi-sub" id="k-time-sub"></div>
                 </article>
@@ -88,8 +89,8 @@
                     <div class="card-head">
                         <h2 id="chart-title">Lượt truy cập theo giờ</h2>
                         <div class="legend">
-                            <span><i class="sw sw-visit"></i>Lượt truy cập</span>
-                            <span><i class="sw sw-contact"></i>Liên hệ</span>
+                            <span><i class="sw sw-visit"></i><span data-zh="访问">Lượt truy cập</span></span>
+                            <span><i class="sw sw-contact"></i><span data-zh="咨询">Liên hệ</span></span>
                         </div>
                     </div>
                     <div class="chart" id="chart"></div>
@@ -97,7 +98,7 @@
 
                 <article class="card">
                     <div class="card-head">
-                        <h2>Đang xem web</h2>
+                        <h2 data-zh="正在浏览的访客">Đang xem web</h2>
                         <span class="pill pill-live" id="online-pill">0</span>
                     </div>
                     <ul class="online-list" id="online-list"></ul>
@@ -107,7 +108,7 @@
             <!-- Khách đã liên hệ -->
             <section class="card">
                 <div class="card-head">
-                    <h2>Khách đã bấm Zalo / Gọi</h2>
+                    <h2 data-zh="点击了 Zalo / 电话的访客">Khách đã bấm Zalo / Gọi</h2>
                     <span class="muted small" id="contacts-count"></span>
                 </div>
                 <ul class="contact-list" id="contact-list"></ul>
@@ -116,19 +117,19 @@
             <!-- Phân tích -->
             <section class="grid grid-4">
                 <article class="card">
-                    <div class="card-head"><h2>Nguồn truy cập</h2></div>
+                    <div class="card-head"><h2 data-zh="访问来源">Nguồn truy cập</h2></div>
                     <ul class="bars" id="b-source"></ul>
                 </article>
                 <article class="card">
-                    <div class="card-head"><h2>Trang được xem</h2></div>
+                    <div class="card-head"><h2 data-zh="浏览的页面">Trang được xem</h2></div>
                     <ul class="bars" id="b-pages"></ul>
                 </article>
                 <article class="card">
-                    <div class="card-head"><h2>Thiết bị</h2></div>
+                    <div class="card-head"><h2 data-zh="设备">Thiết bị</h2></div>
                     <ul class="bars" id="b-device"></ul>
                 </article>
                 <article class="card">
-                    <div class="card-head"><h2>Khu vực</h2></div>
+                    <div class="card-head"><h2 data-zh="地区">Khu vực</h2></div>
                     <ul class="bars" id="b-city"></ul>
                 </article>
             </section>
@@ -136,35 +137,35 @@
             <!-- Bảng chi tiết -->
             <section class="card card-table">
                 <div class="card-head">
-                    <h2>Tất cả lượt truy cập</h2>
+                    <h2 data-zh="全部访问记录">Tất cả lượt truy cập</h2>
                     <button class="btn btn-ghost btn-sm" type="button" id="export-btn">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Xuất Excel (CSV)
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span data-zh="导出 Excel (CSV)">Xuất Excel (CSV)</span>
                     </button>
                 </div>
                 <div class="toolbar">
                     <label class="search">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                        <input type="search" id="search" placeholder="Tìm theo khu vực, IP, nguồn, trang…" aria-label="Tìm kiếm">
+                        <input type="search" id="search" placeholder="Tìm theo khu vực, IP, nguồn, trang…" data-zh-placeholder="按地区、IP、来源、页面搜索…" aria-label="Tìm kiếm" data-zh-aria="搜索">
                     </label>
-                    <div class="chips" id="chips" role="group" aria-label="Lọc">
-                        <button class="chip on" type="button" data-f="all">Tất cả</button>
-                        <button class="chip" type="button" data-f="contacted">Đã liên hệ</button>
-                        <button class="chip" type="button" data-f="online">Đang online</button>
-                        <button class="chip" type="button" data-f="returning">Khách quay lại</button>
-                        <button class="chip" type="button" data-f="mobile">Điện thoại</button>
+                    <div class="chips" id="chips" role="group" aria-label="Lọc" data-zh-aria="筛选">
+                        <button class="chip on" type="button" data-f="all" data-label="Tất cả" data-label-zh="全部">Tất cả</button>
+                        <button class="chip" type="button" data-f="contacted" data-label="Đã liên hệ" data-label-zh="已咨询">Đã liên hệ</button>
+                        <button class="chip" type="button" data-f="online" data-label="Đang online" data-label-zh="在线">Đang online</button>
+                        <button class="chip" type="button" data-f="returning" data-label="Khách quay lại" data-label-zh="回访客户">Khách quay lại</button>
+                        <button class="chip" type="button" data-f="mobile" data-label="Điện thoại" data-label-zh="手机">Điện thoại</button>
                     </div>
                 </div>
                 <div class="table-wrap">
                     <table class="tbl">
                         <thead>
                             <tr>
-                                <th>Thời điểm</th>
-                                <th>Khách</th>
-                                <th class="hide-sm">Thiết bị</th>
-                                <th>Nguồn</th>
-                                <th class="hide-sm">Trang</th>
-                                <th class="num">Thời gian xem</th>
-                                <th>Liên hệ</th>
+                                <th data-zh="时间">Thời điểm</th>
+                                <th data-zh="访客">Khách</th>
+                                <th class="hide-sm" data-zh="设备">Thiết bị</th>
+                                <th data-zh="来源">Nguồn</th>
+                                <th class="hide-sm" data-zh="进入页面">Trang</th>
+                                <th class="num" data-zh="浏览时长">Thời gian xem</th>
+                                <th data-zh="咨询">Liên hệ</th>
                             </tr>
                         </thead>
                         <tbody id="tbody"></tbody>
@@ -176,43 +177,43 @@
             <!-- Sao lưu tự động -->
             <section class="card bk" aria-labelledby="bk-title">
                 <div class="card-head">
-                    <h2 id="bk-title">Sao lưu tự động</h2>
+                    <h2 id="bk-title" data-zh="自动备份">Sao lưu tự động</h2>
                     <button class="btn btn-ghost btn-sm bk-toggle" type="button" id="bk-toggle" aria-pressed="false"><i class="sw-toggle" aria-hidden="true"></i><span>Đã tắt</span></button>
                 </div>
                 <div class="grid grid-3">
                     <div class="bk-box">
-                        <h3>Trạng thái</h3>
+                        <h3 data-zh="状态">Trạng thái</h3>
                         <span class="pill" id="bk-state">Đã tắt</span>
                         <dl class="bk-kv">
-                            <dt>Lần tiếp theo</dt><dd id="bk-next">—</dd>
-                            <dt>Lần gần nhất</dt><dd id="bk-last">Chưa sao lưu lần nào</dd>
+                            <dt data-zh="下次备份">Lần tiếp theo</dt><dd id="bk-next">—</dd>
+                            <dt data-zh="最近一次">Lần gần nhất</dt><dd id="bk-last">Chưa sao lưu lần nào</dd>
                         </dl>
                         <span class="pill" id="bk-server">Server: đang kiểm tra…</span>
                     </div>
                     <div class="bk-box">
-                        <h3>Thông tin sao lưu</h3>
+                        <h3 data-zh="备份说明">Thông tin sao lưu</h3>
                         <ul class="bk-info">
-                            <li>Tự chạy lúc <b id="bk-time">13:00 (giờ VN)</b> mỗi ngày</li>
-                            <li>Sao lưu dữ liệu <b id="bk-day">của ngày hôm trước</b></li>
-                            <li>Xuất 2 file: <b>Excel (.xls)</b> và <b>JSON (.json)</b></li>
-                            <li>Lưu vào <span id="bk-where">thư mục backups/ trên server</span></li>
-                            <li>Tên file theo ngày, ví dụ <code>hohai-vn_2026-11-25.xls</code></li>
-                            <li>Chỉ chạy khi trang này đang mở trên máy đã bật. Mở trang sau giờ hẹn thì tự chạy bù.</li>
+                            <li data-zh='每天 <b id="bk-time">13:00（越南时间）</b> 自动运行'>Tự chạy lúc <b id="bk-time">13:00 (giờ VN)</b> mỗi ngày</li>
+                            <li data-zh='备份<b id="bk-day">前一天</b>的数据'>Sao lưu dữ liệu <b id="bk-day">của ngày hôm trước</b></li>
+                            <li data-zh="导出 2 个文件：<b>Excel (.xls)</b> 和 <b>JSON (.json)</b>">Xuất 2 file: <b>Excel (.xls)</b> và <b>JSON (.json)</b></li>
+                            <li data-zh='保存到 <span id="bk-where">服务器的 backups/ 目录</span>'>Lưu vào <span id="bk-where">thư mục backups/ trên server</span></li>
+                            <li data-zh="文件按日期命名，例如 <code>hohai-vn_2026-11-25.xls</code>">Tên file theo ngày, ví dụ <code>hohai-vn_2026-11-25.xls</code></li>
+                            <li data-zh="仅在已开启备份的电脑上打开本页面时运行。若错过设定时间，打开页面后会自动补做。">Chỉ chạy khi trang này đang mở trên máy đã bật. Mở trang sau giờ hẹn thì tự chạy bù.</li>
                         </ul>
                     </div>
                     <div class="bk-box">
-                        <h3>Sao lưu thủ công</h3>
-                        <p class="muted small">Sao lưu ngay dữ liệu của ngày hôm qua (Excel + JSON), không cần chờ tới giờ hẹn.</p>
+                        <h3 data-zh="手动备份">Sao lưu thủ công</h3>
+                        <p class="muted small" data-zh="立即备份昨天的数据（Excel + JSON），无需等到设定时间。">Sao lưu ngay dữ liệu của ngày hôm qua (Excel + JSON), không cần chờ tới giờ hẹn.</p>
                         <button class="btn btn-primary btn-block" type="button" id="bk-manual">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Sao lưu ngay (dữ liệu hôm qua)
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span data-zh="立即备份（昨天的数据）">Sao lưu ngay (dữ liệu hôm qua)</span>
                         </button>
                     </div>
                 </div>
-                <h3 class="bk-hist-title">Lịch sử sao lưu <span class="muted small">(trên máy này)</span></h3>
+                <h3 class="bk-hist-title" data-zh='备份记录 <span class="muted small">（本机）</span>'>Lịch sử sao lưu <span class="muted small">(trên máy này)</span></h3>
                 <ul class="bk-history" id="bk-history"></ul>
             </section>
 
-            <p class="foot muted small">Giờ hiển thị theo giờ Việt Nam (GMT+7). Vị trí suy ra từ địa chỉ IP nên chỉ đúng ở mức tỉnh/thành. Lượt xem từ bot và từ máy đã từng mở trang giám sát này không được tính.</p>
+            <p class="foot muted small" data-zh="时间均为越南时间 (GMT+7)。位置根据 IP 地址推断，只精确到省/市。来自机器人以及打开过本监控页面的电脑的访问不计入统计。">Giờ hiển thị theo giờ Việt Nam (GMT+7). Vị trí suy ra từ địa chỉ IP nên chỉ đúng ở mức tỉnh/thành. Lượt xem từ bot và từ máy đã từng mở trang giám sát này không được tính.</p>
         </main>
 
         <!-- Chi tiết khách -->
@@ -223,7 +224,7 @@
                     <h2 id="d-title">Chi tiết lượt truy cập</h2>
                     <div class="muted small" id="d-sub"></div>
                 </div>
-                <button class="icon-btn" type="button" id="d-close" aria-label="Đóng">
+                <button class="icon-btn" type="button" id="d-close" aria-label="Đóng" data-zh-aria="关闭">
                     <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
                 </button>
             </div>
@@ -235,8 +236,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="js/monitor-config.js?v=3"></script>
-    <script src="js/monitor.js?v=4"></script>
+    <script src="js/monitor-config.js?v=4"></script>
+    <script src="js/monitor.js?v=5"></script>
 </body>
 
 </html>

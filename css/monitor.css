@@ -356,3 +356,9 @@ svg { flex: none; }
 .bk-history li.bad b { color: var(--down); }
 .bk-history li.empty { justify-content: center; padding: 18px 0; }
 @media (max-width: 960px) { .grid-3 { grid-template-columns: 1fr; } }
+
+/* ---------- Nút chọn ngôn ngữ VI / 中文 ---------- */
+.seg.seg-lang { margin-left: 0; padding: 3px; order: 0; width: auto; }
+.seg.seg-lang button { height: 30px; padding: 0 10px; font-size: 13px; flex: none; }
+.seg.seg-lang button[aria-pressed="true"] { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 3px rgba(15, 26, 20, .1); }
+html[lang="zh-CN"] body { font-family: 'Be Vietnam Pro', 'PingFang SC', 'Microsoft YaHei', 'Noto Sans SC', system-ui, sans-serif; }

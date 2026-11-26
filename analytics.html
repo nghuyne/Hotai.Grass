@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="referrer" content="no-referrer">
+    <title>Giám sát truy cập · HoHai VN</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%231d5236'/><path d='M7 20h4l3-8 4 12 3-6h4' fill='none' stroke='white' stroke-width='2.4' stroke-linecap='round' stroke-linejoin='round'/></svg>">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/monitor.css?v=2">
+</head>
+
+<body>
+    <!-- ============ Đang tải ============ -->
+    <div id="screen-loading" class="gate">
+        <div class="spinner" aria-label="Đang tải"></div>
+    </div>
+
+    <!-- ============ Dashboard ============ -->
+    <div id="screen-app" hidden>
+        <header class="topbar">
+            <div class="wrap topbar-in">
+                <div class="brand">
+                    <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="9" fill="currentColor"/><path d="M7 20h4l3-8 4 12 3-6h4" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    <div>
+                        <div class="brand-name">Giám sát truy cập</div>
+                        <div class="brand-sub">HoHai Việt Nam</div>
+                    </div>
+                </div>
+
+                <div class="seg" role="tablist" aria-label="Khoảng thời gian" id="range-seg">
+                    <button role="tab" data-range="today" aria-selected="true">Hôm nay</button>
+                    <button role="tab" data-range="yesterday" aria-selected="false">Hôm qua</button>
+                    <button role="tab" data-range="7d" aria-selected="false">7 ngày</button>
+                    <button role="tab" data-range="30d" aria-selected="false">30 ngày</button>
+                </div>
+
+                <div class="top-right">
+                    <span class="conn" id="conn"><span class="dot"></span><span id="conn-text">Đang kết nối…</span></span>
+                    <a class="btn btn-ghost btn-sm" href="index.html" target="_blank" rel="noopener">Mở website ↗</a>
+                </div>
+            </div>
+        </header>
+
+        <div class="demo-bar" id="demo-bar" hidden>Đang xem <b>dữ liệu mẫu</b> để xem trước giao diện — không phải số liệu thật.</div>
+
+        <main class="wrap main">
+            <div class="page-head">
+                <h1 id="range-title">Hôm nay</h1>
+                <p class="muted" id="range-sub"></p>
+            </div>
+
+            <!-- Chỉ số chính -->
+            <section class="kpis" aria-label="Chỉ số chính">
+                <article class="kpi kpi-live">
+                    <div class="kpi-label"><span class="live-dot"></span>Đang xem web</div>
+                    <div class="kpi-value" id="k-online" aria-live="polite">0</div>
+                    <div class="kpi-sub" id="k-online-sub">Chưa có ai</div>
+                </article>
+                <article class="kpi">
+                    <div class="kpi-label">Lượt truy cập</div>
+                    <div class="kpi-value" id="k-sessions">0</div>
+                    <div class="kpi-sub" id="k-sessions-sub"></div>
+                </article>
+                <article class="kpi">
+                    <div class="kpi-label">Khách</div>
+                    <div class="kpi-value" id="k-visitors">0</div>
+                    <div class="kpi-sub" id="k-visitors-sub"></div>
+                </article>
+                <article class="kpi kpi-contact">
+                    <div class="kpi-label">Liên hệ Zalo / Gọi</div>
+                    <div class="kpi-value" id="k-contacts">0</div>
+                    <div class="kpi-sub" id="k-contacts-sub"></div>
+                </article>
+                <article class="kpi">
+                    <div class="kpi-label">Thời gian xem TB <span class="info" tabindex="0" data-tip="Chỉ tính lúc khách đang mở tab và có thao tác (cuộn, chạm, rê chuột). Không tính lúc treo máy hay chuyển sang tab khác.">?</span></div>
+                    <div class="kpi-value" id="k-time">0s</div>
+                    <div class="kpi-sub" id="k-time-sub"></div>
+                </article>
+            </section>
+
+            <!-- Biểu đồ + đang online -->
+            <section class="grid grid-chart">
+                <article class="card">
+                    <div class="card-head">
+                        <h2 id="chart-title">Lượt truy cập theo giờ</h2>
+                        <div class="legend">
+                            <span><i class="sw sw-visit"></i>Lượt truy cập</span>
+                            <span><i class="sw sw-contact"></i>Liên hệ</span>
+                        </div>
+                    </div>
+                    <div class="chart" id="chart"></div>
+                </article>
+
+                <article class="card">
+                    <div class="card-head">
+                        <h2>Đang xem web</h2>
+                        <span class="pill pill-live" id="online-pill">0</span>
+                    </div>
+                    <ul class="online-list" id="online-list"></ul>
+                </article>
+            </section>
+
+            <!-- Khách đã liên hệ -->
+            <section class="card">
+                <div class="card-head">
+                    <h2>Khách đã bấm Zalo / Gọi</h2>
+                    <span class="muted small" id="contacts-count"></span>
+                </div>
+                <ul class="contact-list" id="contact-list"></ul>
+            </section>
+
+            <!-- Phân tích -->
+            <section class="grid grid-4">
+                <article class="card">
+                    <div class="card-head"><h2>Nguồn truy cập</h2></div>
+                    <ul class="bars" id="b-source"></ul>
+                </article>
+                <article class="card">
+                    <div class="card-head"><h2>Trang được xem</h2></div>
+                    <ul class="bars" id="b-pages"></ul>
+                </article>
+                <article class="card">
+                    <div class="card-head"><h2>Thiết bị</h2></div>
+                    <ul class="bars" id="b-device"></ul>
+                </article>
+                <article class="card">
+                    <div class="card-head"><h2>Khu vực</h2></div>
+                    <ul class="bars" id="b-city"></ul>
+                </article>
+            </section>
+
+            <!-- Bảng chi tiết -->
+            <section class="card card-table">
+                <div class="card-head">
+                    <h2>Tất cả lượt truy cập</h2>
+                    <button class="btn btn-ghost btn-sm" type="button" id="export-btn">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg>Xuất Excel (CSV)
+                    </button>
+                </div>
+                <div class="toolbar">
+                    <label class="search">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                        <input type="search" id="search" placeholder="Tìm theo khu vực, IP, nguồn, trang…" aria-label="Tìm kiếm">
+                    </label>
+                    <div class="chips" id="chips" role="group" aria-label="Lọc">
+                        <button class="chip on" type="button" data-f="all">Tất cả</button>
+                        <button class="chip" type="button" data-f="contacted">Đã liên hệ</button>
+                        <button class="chip" type="button" data-f="online">Đang online</button>
+                        <button class="chip" type="button" data-f="returning">Khách quay lại</button>
+                        <button class="chip" type="button" data-f="mobile">Điện thoại</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table class="tbl">
+                        <thead>
+                            <tr>
+                                <th>Thời điểm</th>
+                                <th>Khách</th>
+                                <th class="hide-sm">Thiết bị</th>
+                                <th>Nguồn</th>
+                                <th class="hide-sm">Trang</th>
+                                <th class="num">Thời gian xem</th>
+                                <th>Liên hệ</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+                <div class="pager" id="pager"></div>
+            </section>
+
+            <p class="foot muted small">Giờ hiển thị theo giờ Việt Nam (GMT+7). Vị trí suy ra từ địa chỉ IP nên chỉ đúng ở mức tỉnh/thành. Lượt xem từ bot và từ máy đã từng mở trang giám sát này không được tính.</p>
+        </main>
+
+        <!-- Chi tiết khách -->
+        <div class="scrim" id="scrim" hidden></div>
+        <aside class="drawer" id="drawer" aria-hidden="true" aria-labelledby="d-title" role="dialog">
+            <div class="drawer-head">
+                <div>
+                    <h2 id="d-title">Chi tiết lượt truy cập</h2>
+                    <div class="muted small" id="d-sub"></div>
+                </div>
+                <button class="icon-btn" type="button" id="d-close" aria-label="Đóng">
+                    <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></svg>
+                </button>
+            </div>
+            <div class="drawer-body" id="d-body"></div>
+        </aside>
+
+        <div class="toast" id="toast" role="status" hidden></div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="js/monitor-config.js?v=2"></script>
+    <script src="js/monitor.js?v=2"></script>
+</body>
+
+</html>

@@ -20,7 +20,7 @@
         return null;
     }
 
-    // Cùng luật với Mini App (zalo-miniapp/src/lib/recommend.js)
+    // Cùng luật với Mini App (zalo-miniapp/src/lib/data.js → recommend)
     function recommend(d, space, weight, many) {
         var r = d.recommend[space];
         if (!r) return null;

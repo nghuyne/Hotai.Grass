@@ -612,4 +612,167 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
     .logo .mark, .hd.scrolled .logo .mark, .hd.on-dark:not(.scrolled) .logo .mark { height: 38px; }
     .logo .logo-txt { font-size: 12.5px; padding-left: 10px; line-height: 22px; }
 }
-@media (max-width: 360px) { .logo .logo-txt { display: none; } }
+
+
+/* =========================================================
+ * TỐI ƯU MOBILE (chỉ áp dụng dưới 980px — không ảnh hưởng desktop)
+ * ========================================================= */
+@media (max-width: 979px) {
+    /* Cột grid không bị nội dung dài đẩy tràn khỏi màn hình */
+    .duo > *, .prod > *, .policy > *, .spec-grid > *, .tool > *, .hero-grid > *, .promo > *, .head.split > * { min-width: 0; }
+    /* Danh sách tick: chữ + link chảy liền một dòng, không bị tách cột */
+    .checks li { display: block; position: relative; padding-left: 28px; }
+    .checks li::before { position: absolute; left: 0; top: 0; width: 18px; }
+    /* Bảng thông số: chữ dài (email, địa chỉ) tự xuống dòng */
+    .spec { table-layout: fixed; }
+    .spec th, .spec td { overflow-wrap: anywhere; }
+}
+
+@media (max-width: 899px) {
+    /* Quy trình: số tròn bên trái, chữ bên phải, có đường nối dọc */
+    .steps { grid-template-columns: 1fr !important; }
+    .step { display: grid; grid-template-columns: 48px minmax(0, 1fr); column-gap: 16px; padding: 0 0 28px; }
+    .step::before { grid-row: 1 / span 2; margin-bottom: 0; }
+    .step h3 { margin: 12px 0 6px; }
+    .step::after { content: ''; position: absolute; left: 24px; top: 48px; bottom: 0; width: 1px; background: var(--line); }
+
+    .step:last-child::after { display: none; }
+}
+
+@media (max-width: 860px) {
+    /* Chữ xuống dòng cân đối, tránh 1 từ mồ côi ở dòng cuối */
+    h1, h2, h3, .h2, .quote, .wiz-q { text-wrap: balance; }
+    p, li, .lead { text-wrap: pretty; }
+    /* Ô nhập ≥16px để iPhone không tự phóng to khi chạm */
+    .fld input, .fld select, .fld textarea, .qty input { font-size: 16px; }
+    /* Nút nổi: ẩn khi đang thấy nút CTA ở đầu trang (tránh đè lên nút), hiện lại cùng thanh dưới */
+    .fab { right: 16px; bottom: 16px; }
+    .fab a { width: 48px; height: 48px; }
+    body:has([data-mbar-anchor]):not(.mbar-on) .fab { opacity: 0; pointer-events: none; transform: translateY(12px); }
+    .toast { bottom: 96px; }
+    /* Bảng so sánh: cố định cột đầu khi vuốt ngang */
+    .tbl th, .tbl td { padding: 14px 16px; }
+    .tbl th:first-child, .tbl td:first-child { position: sticky; left: 0; z-index: 1; background: #fff; box-shadow: 1px 0 0 var(--line); }
+    .tbl thead th:first-child { background: #fafbf9; }
+    /* Lightbox: nút chuyển ảnh xuống dưới, không che ảnh */
+    .lb .p, .lb .n { top: auto; bottom: 20px; margin-top: 0; }
+    /* Footer: 2 cột cho Sản phẩm / Công ty, gọn hơn */
+    .ft { padding: 48px 0 32px; }
+    .ft-grid { grid-template-columns: 1fr 1fr; gap: 28px 20px; }
+    .ft-grid > :first-child, .ft-grid > :last-child { grid-column: 1 / -1; }
+    .ft-bottom { flex-direction: column; gap: 6px; }
+}
+
+@media (max-width: 600px) {
+    /* ---- Header + logo: không còn tràn ---- */
+    .hd { height: 64px; }
+    .hd .wrap { gap: 10px; }
+    .hd .logo { flex: 0 1 auto; min-width: 0; }
+    .logo { gap: 8px; }
+    .logo .mark, .hd.scrolled .logo .mark, .hd.on-dark:not(.scrolled) .logo .mark { height: 32px; }
+    .logo .logo-txt { font-size: 11.5px; padding-left: 8px; line-height: 20px; white-space: nowrap; }
+    .hd.on-dark:not(.scrolled) .logo { padding: 6px 12px 6px 10px; border-radius: 14px; }
+    .hd .btn { flex: none; white-space: nowrap; padding: 0 14px; gap: 8px; height: 40px; }
+    .ft .logo .mark { height: 44px; }
+    .ft .logo .logo-txt { font-size: 13px; padding-left: 10px; }
+
+    /* ---- Nút: cho phép xuống dòng, không bao giờ tràn ---- */
+    .btn { white-space: normal; text-align: center; line-height: 1.3; height: auto; min-height: 52px; padding-block: 12px; }
+    .btn-sm { min-height: 42px; padding-block: 9px; }
+    .zalo-mark { flex: none; }
+    .hero-cta .btn, .wiz-rec .acts .btn, .promo-body .btn, .final .btn { width: 100%; }
+
+    /* ---- Hero ---- */
+    .hero { padding-top: 104px; }
+    .hero-full { padding: 112px 0 56px; }
+    .hero-cta { margin-top: 28px; }
+    .hero-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; margin-top: 36px; padding-top: 22px; }
+    .hero-stats b { font-size: 20px; }
+    .hero-stats span { display: block; line-height: 1.4; margin-top: 4px; }
+
+    /* ---- Nội dung ---- */
+    .kv div { padding: 14px; }
+    .kv b { font-size: 15.5px; }
+    .calc-dark { padding: 20px; }
+    .calc-dark .out div, .calc-res div { padding: 14px; min-width: 0; }
+    .calc-dark .out b, .calc-res b { font-size: clamp(18px, 5.6vw, 24px); }
+    .calc-dark .out, .calc-res { gap: 10px; }
+    .spec th, .spec td { padding: 13px 14px; }
+    .spec th { width: 38%; }
+    .faq summary { padding: 20px 34px 20px 0; font-size: 16px; }
+    .faq summary::after { right: 4px; }
+    .faq .ans p { padding: 0 0 20px; }
+    .promo-media { min-height: 220px; }
+    .mosaic figcaption { padding: 28px 12px 10px; font-size: 12.5px; line-height: 1.4; }
+    .mosaic figcaption b { font-size: 13.5px; }
+    .wiz-card span { left: 12px; right: 12px; bottom: 12px; font-size: 14.5px; }
+    .ask a { padding: 6px 0; }
+    .toc { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+@media (max-width: 480px) {
+    .fld-row { grid-template-columns: 1fr; gap: 0; }
+}
+
+@media (max-width: 400px) {
+    .toc { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 359px) {
+    .wrap { width: calc(100% - 32px); }
+    .logo .logo-txt { display: none; }
+}
+
+/* =========================================================
+ * MENU MOBILE (nút ☰ + bảng menu) — desktop không hiển thị
+ * ========================================================= */
+.mnav-btn, .mnav { display: none; }
+@media (max-width: 900px) {
+    .hd .wrap { gap: 12px; }
+    .mnav-btn {
+        display: grid; place-content: center; gap: 4px; flex: none; width: 42px; height: 42px; padding: 0; margin-left: 8px;
+        border-radius: 12px; border: 1px solid var(--line); background: #fff; cursor: pointer; box-shadow: var(--shadow);
+        -webkit-tap-highlight-color: transparent;
+    }
+    .mnav-btn span { display: block; width: 18px; height: 2px; border-radius: 2px; background: var(--ink); transition: transform .35s var(--ease), opacity .2s; }
+    body.mnav-open .mnav-btn span:nth-child(1) { transform: translateY(6px) rotate(45deg); }
+    body.mnav-open .mnav-btn span:nth-child(2) { opacity: 0; }
+    body.mnav-open .mnav-btn span:nth-child(3) { transform: translateY(-6px) rotate(-45deg); }
+
+    .mnav {
+        display: block; position: fixed; inset: 0; z-index: 49; padding-top: 64px;
+        background: rgba(8, 14, 10, .35); opacity: 0; visibility: hidden; transition: opacity .3s var(--ease), visibility .3s;
+    }
+    .mnav-in {
+        background: #fff; max-height: calc(100svh - 64px); overflow-y: auto; overscroll-behavior: contain;
+        padding: 8px 20px calc(20px + env(safe-area-inset-bottom)); border-radius: 0 0 var(--r-lg) var(--r-lg); box-shadow: var(--shadow-lg);
+        transform: translateY(-12px); transition: transform .4s var(--ease);
+    }
+    body.mnav-open .mnav { opacity: 1; visibility: visible; }
+    body.mnav-open .mnav-in { transform: none; }
+    body.mnav-open { overflow: hidden; }
+    /* Header nền trắng khi mở menu (kể cả trên ảnh tối trang chủ) */
+    body.mnav-open .hd { background: #fff; box-shadow: 0 1px 0 var(--line); }
+    body.mnav-open .hd.on-dark .logo { background: none; box-shadow: none; padding: 0; }
+    body.mnav-open .fab, body.mnav-open .mbar { visibility: hidden; }
+
+    .mnav-l { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin: 18px 0 4px; }
+    .mnav-in > a {
+        display: flex; align-items: center; justify-content: space-between; gap: 12px; min-height: 52px; padding: 10px 0;
+        border-bottom: 1px solid var(--line); text-decoration: none; color: var(--ink); font-size: 16.5px; font-weight: 600; letter-spacing: -.01em;
+    }
+    .mnav-in > a small { display: block; font-size: 13px; font-weight: 400; color: var(--muted); letter-spacing: 0; margin-top: 2px; }
+    .mnav-in > a i { font-style: normal; color: var(--muted); transition: transform .3s var(--ease); }
+    .mnav-in > a:active i { transform: translateX(3px); }
+    .mnav-in > a.on { color: var(--brand-2); }
+    .mnav-in > a.on i { color: var(--brand-2); }
+    .mnav-cta { display: grid; gap: 10px; margin-top: 20px; }
+    .mnav-cta .btn { width: 100%; }
+}
+@media (max-width: 600px) {
+    /* Nút Zalo trên header thu về biểu tượng để đủ chỗ cho nút menu */
+    .hd .wrap > .btn-zalo { width: 42px; height: 42px; min-height: 42px; padding: 0; border-radius: 12px; font-size: 0; gap: 0; }
+    .hd .wrap > .btn-zalo .zalo-mark { font-size: 9px; }
+    .mnav-btn { margin-left: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .mnav, .mnav-in, .mnav-btn span { transition: none; } }

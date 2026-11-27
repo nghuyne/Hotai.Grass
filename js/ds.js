@@ -30,6 +30,45 @@
     window.addEventListener('scroll', onScroll, { passive: true });
     onScroll();
 
+    /* ---------- Menu mobile (chỉ hiện dưới 900px, desktop dùng .nav như cũ) ---------- */
+    (function () {
+        var wrap = hd && $('.wrap', hd);
+        if (!wrap) return;
+        var here = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
+        var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
+        var item = function (href, label, sub) {
+            var on = href.toLowerCase() === here ? ' class="on" aria-current="page"' : '';
+            return '<a href="' + esc(href) + '"' + on + '><span>' + esc(label) + (sub ? '<small>' + esc(sub) + '</small>' : '') + '</span><i aria-hidden="true">→</i></a>';
+        };
+        var prod = [['index.html', 'Trang chủ', '']];
+        $$('.nav a', hd).forEach(function (a) { prod.push([a.getAttribute('href'), a.textContent.trim(), '']); });
+        var subs = { 'khay-ve-sinh-co.html': 'Thay tã lót cho căn hộ', 'tham-co-ban-cong.html': 'Trải là dùng, không cần thợ', 'cuon-co-trai-cho.html': 'Trại chó · pet hotel · spa', 'gioi-thieu.html': 'Nhà sản xuất tại TP.HCM' };
+        var html = '<div class="mnav-in"><div class="mnav-l">Sản phẩm &amp; thông tin</div>';
+        prod.forEach(function (p) { html += item(p[0], p[1], subs[p[0]] || ''); });
+        html += '<div class="mnav-l">Hỗ trợ</div>' + item('lien-he.html', 'Liên hệ') + item('chinh-sach-bao-hanh.html', 'Bảo hành & đổi trả') + item('chinh-sach-bao-mat.html', 'Chính sách bảo mật');
+        html += '<div class="mnav-cta"><a href="#" class="btn btn-zalo js-zalo" data-msg="chat"><span class="zalo-mark">Zalo</span>Nhắn Zalo tư vấn</a><a href="tel:0847131400" class="btn btn-ghost">Gọi 0847 131 400</a></div></div>';
+
+        var panel = document.createElement('nav');
+        panel.className = 'mnav'; panel.id = 'mnav'; panel.setAttribute('aria-label', 'Menu');
+        panel.innerHTML = html;
+        var btn = document.createElement('button');
+        btn.type = 'button'; btn.className = 'mnav-btn';
+        btn.setAttribute('aria-controls', 'mnav'); btn.setAttribute('aria-expanded', 'false'); btn.setAttribute('aria-label', 'Mở menu');
+        btn.innerHTML = '<span></span><span></span><span></span>';
+        wrap.appendChild(btn);
+        hd.parentNode.insertBefore(panel, hd.nextSibling);
+
+        var set = function (open) {
+            document.body.classList.toggle('mnav-open', open);
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+            btn.setAttribute('aria-label', open ? 'Đóng menu' : 'Mở menu');
+        };
+        btn.addEventListener('click', function () { set(!document.body.classList.contains('mnav-open')); });
+        panel.addEventListener('click', function (e) { if (e.target === panel || e.target.closest('a')) set(false); });
+        document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+        window.addEventListener('resize', function () { if (window.innerWidth > 900) set(false); });
+    })();
+
     /* ---------- Reveal ---------- */
     var rvEls = $$('.rv, .rv-img');
     if ('IntersectionObserver' in window && !reduce) {

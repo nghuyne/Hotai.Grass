@@ -69,8 +69,48 @@
         window.addEventListener('resize', function () { if (window.innerWidth > 900) set(false); });
     })();
 
+    /* ---------- Bộ biểu tượng: <svg class="i"><use href="#i-ten"/></svg> ---------- */
+    (function () {
+        var P = {
+            check: '<path d="M4 12.5l5 5L20 6.5"/>',
+            cash: '<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.6"/><path d="M6 9.5v.01M18 14.5v.01"/>',
+            truck: '<path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.5"/><circle cx="17" cy="17.5" r="1.5"/>',
+            card: '<rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h4"/>',
+            swap: '<path d="M4 9h13l-3-3M20 15H7l3 3"/>',
+            shield: '<path d="M12 3 4 6v6c0 4.5 3.4 8.3 8 9 4.6-.7 8-4.5 8-9V6l-8-3z"/><path d="m9 12 2 2 4-4"/>',
+            scissors: '<circle cx="6" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M20 4 8.1 15.9M14.5 14.5 20 20M8.1 8.1 12 12"/>',
+            roll: '<ellipse cx="7" cy="12" rx="3" ry="6"/><path d="M7 6h11a3 6 0 0 1 0 12H7"/><path d="M7 10.5a1 1.5 0 1 0 0 3"/>',
+            gift: '<rect x="3.5" y="8" width="17" height="4" rx="1"/><path d="M5 12v8h14v-8M12 8v12M12 8S10.5 4 8 4.5 7 8 12 8zM12 8s1.5-4 4-3.5S17 8 12 8z"/>',
+            pin: '<path d="M12 21s-7-6.2-7-11.5A7 7 0 0 1 19 9.5C19 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+            clock: '<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+            paw: '<circle cx="7" cy="9" r="1.8"/><circle cx="11" cy="5.8" r="1.8"/><circle cx="15.5" cy="6.5" r="1.8"/><circle cx="18" cy="10.5" r="1.8"/><path d="M12.5 11.5c-2.6 0-5.5 3.6-5.5 6a2.6 2.6 0 0 0 3.6 2.3c1.2-.5 2.6-.5 3.8 0A2.6 2.6 0 0 0 18 17.5c0-2.4-2.9-6-5.5-6z"/>',
+            drop: '<path d="M12 3s6 6.5 6 11a6 6 0 0 1-12 0c0-4.5 6-11 6-11z"/>',
+            factory: '<path d="M3 21V10l5 3V10l5 3V10l5 3V4h3v17z"/><path d="M7 17h2M12 17h2M17 17h1"/>',
+            eye: '<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+            home: '<path d="M3 11 12 4l9 7"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
+            store: '<path d="M4 9.5 5.5 4h13L20 9.5"/><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0"/><path d="M5 12v8h14v-8M10 20v-4h4v4"/>',
+            kennel: '<path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9.5 20v-4a2.5 2.5 0 0 1 5 0v4"/>',
+            layers: '<path d="m12 3 9 5-9 5-9-5z"/><path d="m3 12.5 9 5 9-5M3 17l9 5 9-5"/>',
+            timer: '<circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M10 2h4"/>',
+            leaf: '<path d="M5 19c0-8 5-14 15-15-1 10-7 15-15 15z"/><path d="M5 19 13 11"/>',
+            sun: '<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+            chat: '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20.5l1.4-4.9A8 8 0 1 1 21 12z"/>',
+            ruler: '<path d="M3 16 16 3l5 5L8 21z"/><path d="M7 12l2 2M10 9l2 2M13 6l2 2"/>',
+            star: '<path d="m12 3 2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1-4.4-4.3 6.1-.9z"/>',
+            grass: '<path d="M3 20h18M6 20c0-4-1-7-3-9M10 20c0-6 1-10 3-13M14 20c0-4 1.5-7 4-9M18 20c0-2 .5-4 2-5"/>'
+        };
+        var s = '<svg xmlns="http://www.w3.org/2000/svg" style="position:absolute;width:0;height:0;overflow:hidden" aria-hidden="true">';
+        for (var k in P) s += '<symbol id="i-' + k + '" viewBox="0 0 24 24">' + P[k] + '</symbol>';
+        document.body.insertAdjacentHTML('afterbegin', s + '</svg>');
+    })();
+
+    /* ---------- Dải ảnh trượt: nhân đôi để chạy vòng liền mạch ---------- */
+    $$('.strip-track').forEach(function (t) {
+        $$('figure', t).forEach(function (f) { var c = f.cloneNode(true); c.setAttribute('aria-hidden', 'true'); t.appendChild(c); });
+    });
+
     /* ---------- Reveal ---------- */
-    var rvEls = $$('.rv, .rv-img');
+    var rvEls = $$('.rv, .rv-img, .steps');
     if ('IntersectionObserver' in window && !reduce) {
         var io = new IntersectionObserver(function (es) {
             es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
@@ -78,6 +118,54 @@
         rvEls.forEach(function (el) { io.observe(el); });
     } else {
         rvEls.forEach(function (el) { el.classList.add('in'); });
+    }
+
+    /* ---------- Số đếm lên: <b data-count="18900">18.900</b>{hậu tố ngoài thẻ} ---------- */
+    var cEls = $$('[data-count]');
+    if (cEls.length && 'IntersectionObserver' in window && !reduce) {
+        // Có dấu chấm ngăn cách chỉ khi ≥ 10.000 (năm 2022 giữ nguyên "2022")
+        var fmt = function (n, big) { n = Math.round(n); return big ? n.toLocaleString('vi-VN') : String(n); };
+        var cio = new IntersectionObserver(function (es) {
+            es.forEach(function (e) {
+                if (!e.isIntersecting) return;
+                cio.unobserve(e.target);
+                var el = e.target, to = parseFloat(el.getAttribute('data-count')), from = parseFloat(el.getAttribute('data-from') || 0), t0 = null, dur = 1600;
+                var step = function (t) {
+                    if (!t0) t0 = t;
+                    var p = Math.min(1, (t - t0) / dur), k = 1 - Math.pow(1 - p, 4);
+                    el.textContent = fmt(from + (to - from) * k, to >= 10000);
+                    if (p < 1) requestAnimationFrame(step);
+                };
+                el.textContent = fmt(from, to >= 10000);
+                setTimeout(function () { requestAnimationFrame(step); }, 250);
+            });
+        }, { threshold: 0.4 });
+        cEls.forEach(function (el) { cio.observe(el); });
+    }
+
+    /* ---------- Ảnh trôi nhẹ khi cuộn + thanh tiến trình đọc ---------- */
+    if (!reduce) {
+        var pars = $$('.duo-img > img, .final > img, .promo-media > img');
+        pars.forEach(function (im) { im.classList.add('par'); });
+        var bar = document.createElement('div');
+        bar.className = 'sprog'; bar.setAttribute('aria-hidden', 'true');
+        document.body.appendChild(bar);
+        var ticking = false;
+        var frame = function () {
+            ticking = false;
+            var vh = window.innerHeight, de = document.documentElement;
+            bar.style.transform = 'scaleX(' + Math.min(1, window.scrollY / Math.max(1, de.scrollHeight - vh)) + ')';
+            pars.forEach(function (im) {
+                var r = im.parentNode.getBoundingClientRect();
+                if (r.bottom < -100 || r.top > vh + 100) return;
+                var p = (r.top + r.height / 2 - vh / 2) / (vh / 2 + r.height / 2); // -1 → 1
+                im.style.setProperty('--py', (p * -4).toFixed(2) + '%');
+            });
+        };
+        var req = function () { if (!ticking) { ticking = true; requestAnimationFrame(frame); } };
+        window.addEventListener('scroll', req, { passive: true });
+        window.addEventListener('resize', req);
+        frame();
     }
 
     /* ---------- Toast ---------- */
@@ -260,6 +348,13 @@
         qty.addEventListener('change', function () { setQty(qty.value); });
     }
     sync();
+
+    /* ---------- Dải ảnh trượt → lightbox ---------- */
+    $$('.strip-track').forEach(function (t) {
+        var figs = $$('figure', t), n = figs.length / 2;
+        var list = figs.slice(0, n).map(function (f) { return { src: $('img', f).src, cap: $('figcaption', f).textContent }; });
+        figs.forEach(function (f, i) { f.addEventListener('click', function () { openLb(list, i % n); }); });
+    });
 
     window.DS = { toast: toast, showG: showG, select: select, setQty: setQty, state: state, openLb: openLb };
 })();

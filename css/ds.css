@@ -596,9 +596,11 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
 .logo { gap: 14px; }
 .logo .mark { display: block; height: 48px; width: auto; flex: none; transition: height .35s var(--ease); }
 .logo .logo-txt {
-    padding-left: 14px; border-left: 1px solid var(--line);
     font-size: 14.5px; font-weight: 500; letter-spacing: .01em; color: var(--muted); line-height: 28px;
 }
+/* Dấu chân cún hồng (cùng tông logo) – ngăn cách logo và chữ grass.mgotoo */
+.logo .paw { display: block; width: 26px; height: 26px; flex: none; margin: 0 -2px; transition: transform .35s var(--ease); }
+.logo:hover .paw { transform: rotate(-10deg) scale(1.08); }
 .hd.scrolled .logo .mark { height: 42px; }
 .ft .logo .mark { height: 54px; }
 /* Trang chủ: header trong suốt trên ảnh tối → cả cụm logo nằm trong 1 thẻ trắng */
@@ -610,7 +612,8 @@ body.draft .assume { background: #fff4d6; outline: 1px dashed #d9a400; border-ra
 @media (max-width: 600px) {
     .logo { gap: 10px; }
     .logo .mark, .hd.scrolled .logo .mark, .hd.on-dark:not(.scrolled) .logo .mark { height: 38px; }
-    .logo .logo-txt { font-size: 12.5px; padding-left: 10px; line-height: 22px; }
+    .logo .logo-txt { font-size: 12.5px; line-height: 22px; }
+    .logo .paw { width: 20px; height: 20px; }
 }
 
 

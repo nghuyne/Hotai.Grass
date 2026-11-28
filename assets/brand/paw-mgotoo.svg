@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64">
+  <!-- Dấu chân cún – cùng tông hồng logo Mgotoo -->
+  <g transform="rotate(-14 32 34)" fill="#F7BCCD" stroke="#EC9AB5" stroke-width="2.4" stroke-linejoin="round">
+    <ellipse cx="13.5" cy="27" rx="5.6" ry="7" transform="rotate(-28 13.5 27)"/>
+    <ellipse cx="24.5" cy="14.5" rx="6" ry="7.6" transform="rotate(-9 24.5 14.5)"/>
+    <ellipse cx="39.5" cy="14.5" rx="6" ry="7.6" transform="rotate(9 39.5 14.5)"/>
+    <ellipse cx="50.5" cy="27" rx="5.6" ry="7" transform="rotate(28 50.5 27)"/>
+    <path d="M32 29.5C21.5 29.5 13.5 40 13.5 47.5C13.5 54.5 19.5 57 25 56C28.2 55.4 30 53.6 32 53.6C34 53.6 35.8 55.4 39 56C44.5 57 50.5 54.5 50.5 47.5C50.5 40 42.5 29.5 32 29.5Z"/>
+  </g>
+  <!-- điểm sáng nhẹ -->
+  <g fill="#fff" opacity=".7" transform="rotate(-14 32 34)">
+    <ellipse cx="23" cy="11.5" rx="1.8" ry="2.4"/>
+    <ellipse cx="26" cy="40" rx="3.2" ry="2.2" transform="rotate(-25 26 40)"/>
+  </g>
+</svg>

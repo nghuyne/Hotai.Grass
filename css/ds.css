@@ -1005,62 +1005,108 @@ h1, h2, h3, .h2, .quote, .wiz-q { text-wrap: balance; overflow-wrap: break-word;
 }
 
 /* =========================================================
- * CHỌN KÍCH THƯỚC: tấm cỏ vẽ đúng tỉ lệ trên sàn 3D, lưới 1 ô = 1 m (28/11/2026)
- * - Mỗi thẻ: tấm cỏ của size đó + khung nét đứt của size khác, chung 1 góc để so trực tiếp.
- * - Vị trí/kích thước tính bằng mét: --x --y (góc trên trái), --w (dài), --d (rộng); --ox --oy dời cả sàn cho cân giữa.
+ * CHỌN KÍCH THƯỚC: tấm cỏ vẽ trên sàn 3D, CẢ 3 THẺ CÙNG MỘT TỈ LỆ (28/11/2026)
+ * - --m (px cho 1 mét) tính theo bề rộng khung (container query) → 3 thẻ rộng bằng nhau nên tỉ lệ bằng nhau,
+ *   cuộn 5m luôn vừa khung. Không dùng lưới mét (làm sản phẩm trông nhỏ).
+ * - Mỗi tấm đặt giữa sàn: --w (dài), --d (rộng) khai báo trên .floor.
  * - Bề mặt cỏ: assets/img/be-mat-co.png (ghép lặp liền mạch).
  * ========================================================= */
 .size .viz {
-    --m: 42px; --tilt: 52deg;
+    container-type: inline-size;
     --grass: url(../assets/img/be-mat-co.png);
-    position: relative; display: block; height: 160px; margin: 20px 0; border-radius: 14px; overflow: hidden;
-    background: radial-gradient(120% 90% at 50% 0%, #fbf9f4 0%, #efe9dd 100%);
-    perspective: 700px; perspective-origin: 50% -20%;
+    position: relative; display: block; height: 150px; margin: 20px -26px; overflow: hidden;
+    background: radial-gradient(110% 120% at 50% 0%, #fbf9f4 0%, #f1ece1 70%, #ebe4d5 100%);
 }
-@media (max-width: 899px) { .size .viz { --m: 52px; height: 170px; } }
-@media (max-width: 420px) { .size .viz { --m: 46px; height: 156px; } }
+/* Góc nhìn nghiêng phẳng (không phối cảnh): chiều sâu nén còn --k, mọi tấm cùng --m nên so sánh chính xác */
 .size .floor {
-    position: absolute; left: 50%; top: 50%; width: 0; height: 0; transform-style: preserve-3d;
-    transform: rotateX(var(--tilt)) translate(calc(var(--ox, 0) * var(--m)), calc(var(--oy, 0) * var(--m)));
-}
-/* Lưới sàn: vạch đúng từng mét, mờ dần ra mép */
-.size .floor::before {
-    content: ''; position: absolute; width: calc(var(--m) * 12); height: calc(var(--m) * 8); left: calc(var(--m) * -6); top: calc(var(--m) * -4);
-    background-image: linear-gradient(rgba(70, 56, 30, .14) 1px, transparent 1px), linear-gradient(90deg, rgba(70, 56, 30, .14) 1px, transparent 1px);
-    background-size: var(--m) var(--m);
-    -webkit-mask-image: radial-gradient(closest-side, #000 40%, transparent 100%); mask-image: radial-gradient(closest-side, #000 40%, transparent 100%);
-}
-.size .mat, .size .ghost {
-    position: absolute; left: calc(var(--x) * var(--m)); top: calc(var(--y) * var(--m));
-    width: calc(var(--w) * var(--m)); height: calc(var(--d) * var(--m)); border-radius: 3px;
+    --m: min(52px, (100cqw - 104px) / 5); --k: .58;
+    position: absolute; left: calc(50% + 24px); top: 44%; width: 0; height: 0;
 }
 .size .mat {
-    background: linear-gradient(155deg, rgba(255, 255, 255, .16), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .14)), var(--grass) 0 0 / 64px;
-    box-shadow: 0 0 0 1px rgba(25, 45, 20, .35), 0 2px 0 #3a3a34, 0 3.5px 0 #23231f, 0 12px 16px rgba(45, 35, 15, .26);
-    transform: translateZ(1px); transition: transform .5s var(--ease), box-shadow .5s var(--ease);
+    position: absolute; left: calc(var(--w) * var(--m) / -2); top: calc(var(--d) * var(--m) * var(--k) / -2);
+    width: calc(var(--w) * var(--m)); height: calc(var(--d) * var(--m) * var(--k)); border-radius: 3px;
+    background: linear-gradient(170deg, rgba(255, 255, 255, .2), rgba(255, 255, 255, 0) 45%, rgba(0, 0, 0, .14)), var(--grass) 0 0 / 52px 30px;
+    box-shadow: 0 0 0 1px rgba(25, 45, 20, .28), 0 3px 0 #3d3d36, 0 4.5px 0 #26261f, 0 12px 16px -2px rgba(45, 35, 15, .28);
+    transition: transform .5s var(--ease), box-shadow .5s var(--ease);
 }
-.size:hover .mat, .size.on .mat { transform: translateZ(4px); box-shadow: 0 0 0 1px rgba(25, 45, 20, .35), 0 2px 0 #3a3a34, 0 3.5px 0 #23231f, 0 18px 22px rgba(45, 35, 15, .3); }
-/* Khung so sánh: nét đứt xanh đậm, viền trắng mờ để thấy được cả trên cỏ lẫn trên sàn */
-.size .ghost {
-    border: 1.6px dashed #1d5236; transform: translateZ(6px);
-    filter: drop-shadow(0 0 1.2px rgba(255, 255, 255, .95)) drop-shadow(0 0 1px rgba(255, 255, 255, .8));
+.size:hover .mat, .size.on .mat { transform: translateY(-3px); box-shadow: 0 0 0 1px rgba(25, 45, 20, .28), 0 3px 0 #3d3d36, 0 4.5px 0 #26261f, 0 18px 22px -2px rgba(45, 35, 15, .3); }
+/* Đường kích thước kiểu bản vẽ: vạch mảnh + 2 đầu chặn, số đặt giữa */
+.size .dim { position: absolute; border-color: rgba(15, 26, 20, .4); border-style: solid; border-width: 0; }
+.size .dim::before, .size .dim::after { content: ''; position: absolute; background: rgba(15, 26, 20, .4); }
+.size .dim.w {
+    left: calc(var(--w) * var(--m) / -2); width: calc(var(--w) * var(--m));
+    top: calc(var(--d) * var(--m) * var(--k) / 2 + 20px); border-top-width: 1.5px;
 }
-/* Nhãn kích thước: đứng thẳng (quay ngược góc nghiêng) để luôn đọc được */
-.size .lab {
-    position: absolute; font-size: 11.5px; font-weight: 700; color: var(--ink); white-space: nowrap; line-height: 1;
-    background: rgba(255, 255, 255, .88); padding: 3px 6px; border-radius: 6px; box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+.size .dim.w::before, .size .dim.w::after { top: -6px; width: 1.5px; height: 11px; }
+.size .dim.w::before { left: 0; } .size .dim.w::after { right: 0; }
+.size .dim.d {
+    top: calc(var(--d) * var(--m) * var(--k) / -2); height: calc(var(--d) * var(--m) * var(--k));
+    left: calc(var(--w) * var(--m) / -2 - 14px); border-left-width: 1.5px;
 }
-.size .lab.w { left: calc((var(--x) + var(--w) / 2) * var(--m)); top: calc((var(--y) + var(--d)) * var(--m) + 9px); transform-origin: 50% 0; transform: translateX(-50%) translateZ(2px) rotateX(calc(var(--tilt) * -1)); }
-.size .lab.d { left: calc(var(--x) * var(--m) - 8px); top: calc((var(--y) + var(--d) / 2) * var(--m)); transform-origin: 100% 50%; transform: translate(-100%, -50%) translateZ(2px) rotateX(calc(var(--tilt) * -1)); }
-.size .lab.g { background: #1d5236; color: #fff; }
-.size .viz .scale {
-    position: absolute; left: 10px; right: 10px; bottom: 8px; font-size: 11px; font-weight: 500; color: #8b8371;
-    display: flex; justify-content: space-between; gap: 8px;
+.size .dim.d::before, .size .dim.d::after { left: -6px; height: 1.5px; width: 11px; }
+.size .dim.d::before { top: 0; } .size .dim.d::after { bottom: 0; }
+.size .dim b {
+    position: absolute; font-size: 12px; font-weight: 700; color: var(--ink); white-space: nowrap; line-height: 1;
+    background: #fff; padding: 4px 8px; border-radius: 999px; box-shadow: 0 1px 2px rgba(15, 26, 20, .1), 0 0 0 1px rgba(15, 26, 20, .07);
 }
-.size .viz .scale span { display: inline-flex; align-items: center; gap: 6px; }
-.size .viz .scale .k1::before { content: ''; width: 10px; height: 10px; border: 1px solid rgba(70, 56, 30, .35); border-radius: 2px; }
-.size .viz .scale .k2::before { content: ''; width: 14px; height: 0; border-top: 1.6px dashed #1d5236; }
+.size .dim.w b { left: 50%; top: 0; transform: translate(-50%, -50%); }
+.size .dim.d b { left: -8px; top: 50%; transform: translate(-100%, -50%); }
+.size.on .dim b { color: var(--brand); }
+@media (max-width: 899px) { .size .viz { height: 160px; } .size .floor { --m: min(60px, (100cqw - 104px) / 5); } }
 @media (prefers-reduced-motion: reduce) { .size .mat { transition: none; } }
-.size .viz.long { --m: 36px; }
-@media (max-width: 899px) { .size .viz.long { --m: 50px; } }
-@media (max-width: 420px) { .size .viz.long { --m: 40px; } }
+
+/* =========================================================
+ * CÔNG CỤ TÍNH SỐ TẤM — có số mẫu sẵn + mặt bằng trải cỏ (28/11/2026)
+ * ========================================================= */
+.presets { margin-bottom: 22px; }
+.presets-l { display: block; font-size: 13.5px; font-weight: 600; color: var(--ink); margin-bottom: 10px; }
+.pre-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.pre {
+    display: grid; gap: 2px; text-align: left; font-family: inherit; cursor: pointer;
+    background: #fff; border: 1px solid #d9e0da; border-radius: 12px; padding: 10px 12px;
+    font-size: 13.5px; font-weight: 600; color: var(--ink); line-height: 1.25;
+    transition: border-color .25s, background .25s, box-shadow .25s;
+}
+.pre small { font-size: 12.5px; font-weight: 500; color: var(--muted); }
+.pre:hover { border-color: var(--brand-2); }
+.pre.on { border-color: var(--brand); background: var(--brand-soft); box-shadow: inset 0 0 0 1px var(--brand); }
+.pre.on small { color: var(--brand); }
+.pre:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.inp { position: relative; }
+.inp input { padding-right: 40px; font-weight: 600; font-size: 17px; }
+.inp > span { position: absolute; right: 14px; top: 50%; transform: translateY(-50%); font-size: 14px; color: var(--muted); pointer-events: none; }
+.fld input[aria-invalid="true"] { border-color: #c2412d; box-shadow: 0 0 0 4px rgba(194, 65, 45, .1); }
+.fit-area { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 14px 16px; margin: 4px 0 16px; background: var(--sand); border-radius: 12px; font-size: 13.5px; color: var(--muted); }
+.fit-area b { font-size: 18px; color: var(--ink); }
+
+/* Mặt bằng */
+.plan { background: #fff; border: 1px solid var(--line); border-radius: var(--r-lg); padding: 22px 22px 18px; }
+.plan-h { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.plan-h h3 { font-size: 16.5px; line-height: 1.3; }
+.plan-h p { font-size: 13px; color: var(--muted); margin-top: 3px; }
+.tag-sample { flex: none; font-size: 11.5px; font-weight: 600; color: #8a5a00; background: #fff4dc; border: 1px solid #f3dca6; border-radius: 999px; padding: 4px 10px; white-space: nowrap; }
+.plan-fig { margin: 0; border-radius: 14px; background: #f7f4ee; padding: 14px; }
+.plan-fig svg { display: block; width: 100%; height: auto; max-height: 300px; }
+.plan-key { display: flex; flex-wrap: wrap; gap: 6px 18px; margin-top: 12px; font-size: 12.5px; color: var(--muted); }
+.plan-key span { display: inline-flex; align-items: center; gap: 7px; }
+.plan-key i { width: 14px; height: 14px; border-radius: 3px; flex: none; }
+.plan-key .k-g { background: #3f8f5c url(../assets/img/be-mat-co.png) center / 24px; }
+.plan-key .k-c { background: repeating-linear-gradient(135deg, #e9e3d6 0 3px, #fff 3px 6px); box-shadow: inset 0 0 0 1px #d6cdbb; }
+.plan-key .k-b { border: 2px solid var(--ink); border-radius: 2px; }
+.res-l { font-size: 13px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; margin: 10px 2px 0; }
+.tool-out .res { cursor: default; }
+.res.best { background: linear-gradient(180deg, #f5faf6, #fff); }
+.fit-note { font-size: 13px; color: var(--muted); background: #fff; border: 1px solid var(--line); border-radius: var(--r); padding: 14px 16px; }
+@media (max-width: 600px) {
+    .tool-in, .plan { padding: 18px; }
+    .plan-h { flex-direction: column; gap: 8px; }
+}
+.tool-out .res[data-i] { cursor: pointer; }
+.tool-out .res[data-i]:hover { border-color: #b9cbbd; }
+.tool-out .res.view { box-shadow: inset 0 0 0 1px var(--brand), 0 6px 18px rgba(29, 82, 54, .1); border-color: var(--brand); }
+.tool-out .res.best.view, .tool-out .res.best { border-color: var(--brand); }
+.tool-out .res[data-i]:focus-visible { outline: 2px solid var(--brand); outline-offset: 2px; }
+.tool-out .res.best:not(.view) { box-shadow: none; }
+.tool > .tool-in { align-self: start; }
+@media (min-width: 900px) { .tool > .tool-in { position: sticky; top: 96px; } }
+.size .viz { border-radius: 0; }

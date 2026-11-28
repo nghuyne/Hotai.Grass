@@ -33,10 +33,10 @@ window.HOHAI_MONITOR = {
     backup: {
         hour: 13, minute: 0,          // giờ chạy mỗi ngày, theo giờ Việt Nam
         daysAgo: 1,                   // 1 = sao lưu dữ liệu ngày hôm trước
-        // Server lưu file (server.js của web US, có /api/backup/health và /api/backup/save-batch).
-        // Để '' nếu không dùng server: file sẽ tải về thư mục Downloads của máy đang mở trang giám sát.
-        // Lưu ý: trang chạy https thì server cũng phải là https, nếu không trình duyệt sẽ chặn.
-        server: 'http://43.156.51.248:3007',
-        filePrefix: 'hohai-vn'        // tên file: hohai-vn_2026-11-25.xls / .json (tách biệt với file của web US)
+        // Nơi lưu file: '' = chính server web VN (tools/serve.js, chạy bằng CHAY-WEB.bat) → thư mục web-vn/backups/.
+        // Web VN hoàn toàn tách khỏi web US: không gửi gì sang server / thư mục của web US.
+        // Nếu mở trang không qua server web VN (mở file trực tiếp, Live Server…) thì file tải về thư mục Downloads.
+        server: '',
+        filePrefix: 'hohai-vn'        // tên file: hohai-vn_2026-11-25.xlsx / .json
     }
 };

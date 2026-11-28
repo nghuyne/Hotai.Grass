@@ -1,3 +1,6 @@
 .DS_Store
 *.ORIG.*
 node_modules/
+
+# File sao lưu dữ liệu giám sát (có IP, SĐT khách) — không đưa lên git
+backups/

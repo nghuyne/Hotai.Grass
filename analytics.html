@@ -11,7 +11,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/monitor.css?v=7">
+    <link rel="stylesheet" href="css/monitor.css?v=10">
 </head>
 
 <body>
@@ -155,20 +155,32 @@
                 <div class="card-head">
                     <h2 data-zh="全部访问记录">Tất cả lượt truy cập</h2>
                     <button class="btn btn-ghost btn-sm" type="button" id="export-btn">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span data-zh="导出 Excel (CSV)">Xuất Excel (CSV)</span>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11m0 0-4-4m4 4 4-4M5 20h14"/></svg><span data-zh="导出 Excel">Xuất Excel</span>
                     </button>
                 </div>
                 <div class="toolbar">
                     <label class="search">
                         <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-                        <input type="search" id="search" placeholder="Tìm theo khu vực, IP, nguồn, trang…" data-zh-placeholder="按地区、IP、来源、页面搜索…" aria-label="Tìm kiếm" data-zh-aria="搜索">
+                        <input type="search" id="search" placeholder="Tìm theo khu vực, IP, nguồn, trang, nút Zalo…" data-zh-placeholder="按地区、IP、来源、页面、Zalo 按钮搜索…" aria-label="Tìm kiếm" data-zh-aria="搜索">
                     </label>
+                    <button class="btn btn-ghost filter-btn" type="button" id="filter-btn" aria-expanded="false" aria-controls="filter-panel">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M7 12h10M10 18h4"/></svg><span data-zh="筛选">Bộ lọc</span><b class="filter-n" id="filter-n" hidden>0</b>
+                    </button>
                     <div class="chips" id="chips" role="group" aria-label="Lọc" data-zh-aria="筛选">
                         <button class="chip on" type="button" data-f="all" data-label="Tất cả" data-label-zh="全部">Tất cả</button>
                         <button class="chip" type="button" data-f="contacted" data-label="Đã liên hệ" data-label-zh="已咨询">Đã liên hệ</button>
+                        <button class="chip" type="button" data-f="zalo" data-label="Zalo" data-label-zh="Zalo">Zalo</button>
+                        <button class="chip" type="button" data-f="phone" data-label="Gọi điện" data-label-zh="电话">Gọi điện</button>
                         <button class="chip" type="button" data-f="online" data-label="Đang online" data-label-zh="在线">Đang online</button>
                         <button class="chip" type="button" data-f="returning" data-label="Khách quay lại" data-label-zh="回访客户">Khách quay lại</button>
                         <button class="chip" type="button" data-f="mobile" data-label="Điện thoại" data-label-zh="手机">Điện thoại</button>
+                    </div>
+                </div>
+                <div class="filter-panel" id="filter-panel" hidden>
+                    <div class="filter-grid" id="filter-grid"></div>
+                    <div class="filter-foot">
+                        <span class="muted small" id="filter-sum"></span>
+                        <button class="link-btn" type="button" id="filter-clear" data-zh="清除筛选">Xoá bộ lọc</button>
                     </div>
                 </div>
                 <div class="table-wrap">
@@ -177,6 +189,7 @@
                             <tr>
                                 <th data-zh="时间">Thời điểm</th>
                                 <th data-zh="访客">Khách</th>
+                                <th class="hide-sm">IP</th>
                                 <th class="hide-sm" data-zh="设备">Thiết bị</th>
                                 <th data-zh="来源">Nguồn</th>
                                 <th class="hide-sm" data-zh="进入页面">Trang</th>
@@ -211,9 +224,9 @@
                         <ul class="bk-info">
                             <li data-zh='每天 <b id="bk-time">13:00（越南时间）</b> 自动运行'>Tự chạy lúc <b id="bk-time">13:00 (giờ VN)</b> mỗi ngày</li>
                             <li data-zh='备份<b id="bk-day">前一天</b>的数据'>Sao lưu dữ liệu <b id="bk-day">của ngày hôm trước</b></li>
-                            <li data-zh="导出 2 个文件：<b>Excel (.xls)</b> 和 <b>JSON (.json)</b>">Xuất 2 file: <b>Excel (.xls)</b> và <b>JSON (.json)</b></li>
-                            <li data-zh='保存到 <span id="bk-where">服务器的 backups/ 目录</span>'>Lưu vào <span id="bk-where">thư mục backups/ trên server</span></li>
-                            <li data-zh="文件按日期命名，例如 <code>hohai-vn_2026-11-25.xls</code>">Tên file theo ngày, ví dụ <code>hohai-vn_2026-11-25.xls</code></li>
+                            <li data-zh="导出 2 个文件：<b>Excel 报告 (.xlsx)</b>（与“导出 Excel”相同格式）和 <b>JSON (.json)</b> 原始数据">Xuất 2 file: <b>báo cáo Excel (.xlsx)</b> giống nút “Xuất Excel” và <b>JSON (.json)</b> dữ liệu gốc</li>
+                            <li data-zh='保存到 <span id="bk-where">web-vn/backups/ 目录</span>'>Lưu vào <span id="bk-where">thư mục web-vn/backups/</span></li>
+                            <li data-zh="文件按日期命名，例如 <code>hohai-vn_2026-11-25.xlsx</code>">Tên file theo ngày, ví dụ <code>hohai-vn_2026-11-25.xlsx</code></li>
                             <li data-zh="仅在已开启备份的电脑上打开本页面时运行。若错过设定时间，打开页面后会自动补做。">Chỉ chạy khi trang này đang mở trên máy đã bật. Mở trang sau giờ hẹn thì tự chạy bù.</li>
                         </ul>
                     </div>
@@ -227,6 +240,18 @@
                 </div>
                 <h3 class="bk-hist-title" data-zh='备份记录 <span class="muted small">（本机）</span>'>Lịch sử sao lưu <span class="muted small">(trên máy này)</span></h3>
                 <ul class="bk-history" id="bk-history"></ul>
+                <div class="bk-files-head">
+                    <h3 class="bk-hist-title" data-zh="备份文件">File sao lưu</h3>
+                    <button class="link-btn" type="button" id="bk-refresh" data-zh="刷新">Làm mới</button>
+                </div>
+                <p class="muted small bk-files-where" id="bk-files-where"></p>
+                <form class="pin-form bk-dl-form" id="bk-dl-form" autocomplete="off" hidden>
+                    <input class="pin-input" id="bk-pin" type="password" inputmode="numeric" maxlength="8" placeholder="Mã PIN" data-zh-placeholder="PIN 码" aria-label="Mã PIN để tải file" data-zh-aria="下载文件所需的 PIN 码">
+                    <span class="muted small" data-zh="输入 PIN 码，然后点击要下载的文件">Nhập mã PIN rồi bấm vào file cần tải</span>
+                    <p class="form-msg" id="bk-pin-msg" role="alert"></p>
+                </form>
+                <p class="small bk-files-note" id="bk-files-note"></p>
+                <ul class="bk-history bk-files" id="bk-files"></ul>
             </section>
 
             <p class="foot muted small" data-zh="时间均为越南时间 (GMT+7)。位置根据 IP 地址推断，只精确到省/市。来自机器人以及打开过本监控页面的电脑的访问不计入统计。">Giờ hiển thị theo giờ Việt Nam (GMT+7). Vị trí suy ra từ địa chỉ IP nên chỉ đúng ở mức tỉnh/thành. Lượt xem từ bot và từ máy đã từng mở trang giám sát này không được tính.</p>
@@ -252,8 +277,8 @@
 
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
-    <script src="js/monitor-config.js?v=6"></script>
-    <script src="js/monitor.js?v=7"></script>
+    <script src="js/monitor-config.js?v=7"></script>
+    <script src="js/monitor.js?v=13"></script>
 </body>
 
 </html>
